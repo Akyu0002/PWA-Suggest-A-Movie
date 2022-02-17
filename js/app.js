@@ -65,8 +65,8 @@ const APP = {
     };
   },
   createTransaction: (storeName) => {
-    let tx = APP.DB.transaction(storeName, "readwrite")
-    console.log({tx})
+    let tx = APP.DB.transaction(storeName, "readwrite");
+    console.log({ tx });
     //create a transaction to use for some interaction with the database
 
     return tx;
@@ -76,13 +76,14 @@ const APP = {
   },
   addResultsToDB: (obj, storeName) => {
     //pass in the name of the store
+ 
     //save the obj passed in to the appropriate store
   },
   addListeners: () => {
     //add listeners
     //when the search form is submitted
-    let search = document.getElementById('btnSearch')
-    search.addEventListener('click', APP.searchFormSubmitted)
+    let search = document.getElementById("btnSearch");
+    search.addEventListener("click", APP.searchFormSubmitted);
 
     //when clicking on the list of possible searches on home or 404 page
     //when a message is received
@@ -118,32 +119,33 @@ const APP = {
   },
   searchFormSubmitted: (ev) => {
     ev.preventDefault();
-    console.log('Working')
+    console.log("Working");
     //get the keyword from teh input
-    APP.searchInput = document.getElementById('search').value
-
+    APP.searchInput = document.getElementById("search").value;
 
     //make sure it is not empty
-    if (APP.searchInput === '') {
-      throw new Error('Please enter a search term.')
+    if (APP.searchInput === "") {
+      throw new Error("Please enter a search term.");
     } else {
+      //check the db for matches
+      let newTx = APP.createTransaction("searchStore");
+      let searchStore = newTx.objectStore("searchStore");
+      let getRequest = searchStore.get(APP.searchInput);
 
-   //check the db for matches
-   let newTx = APP.createTransaction('searchStore')
-   let searchStore =  newTx.objectStore('searchStore')
-   let getRequest = searchStore.get(APP.searchInput)
-  
-   getRequest.onsuccess = (ev) => {
+      getRequest.onsuccess = (ev) => {
+        console.log(ev.target);
 
-      if(ev.target.result.results === undefined) {
-        //do a fetch call for search results
-        APP.getData()
-        //save results to db
-      } else {
+        if (ev.target.result === undefined) {
+          //do a fetch call for search results
+          console.log("Fetching from the API");
+          APP.getData(APP.searchInput);
 
-        console.log('Its in the DB!')
-      }
-    }
+          //save results to db
+
+        } else {
+          console.log("Fetching from the DB!");
+        }
+      };
     }
     //navigate to url
   },
@@ -156,8 +158,9 @@ const APP = {
     //build a url
     //navigate to the suggest page
   },
-  getData: (endpoint, callback) => {
+  getData: (endpoint) => {
     //do a fetch call to the endpoint
+    let url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
     fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
@@ -173,10 +176,12 @@ const APP = {
         let results = contents.results;
         //remove the properties we don't need
         //save the updated results to APP.results
-        // call the callback
+        APP.results = results
+        console.log(APP.results)
       })
       .catch((err) => {
         //handle the NetworkError
+        console.warn(err)
       });
   },
   getSearchResults: (keyword) => {
