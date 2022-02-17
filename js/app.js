@@ -65,10 +65,8 @@ const APP = {
     };
   },
   createTransaction: (storeName) => {
+     //create a transaction to use for some interaction with the database
     let tx = APP.DB.transaction(storeName, "readwrite");
-    console.log({ tx });
-    //create a transaction to use for some interaction with the database
-
     return tx;
   },
   getDBResults: (storeName, keyValue) => {
@@ -76,8 +74,15 @@ const APP = {
   },
   addResultsToDB: (obj, storeName) => {
     //pass in the name of the store
- 
+    let tx = APP.createTransaction(storeName)
+    let store = tx.objectStore(storeName);
+    let newObj = {
+      keyword: APP.searchInput,
+      results: obj
+    }
+   
     //save the obj passed in to the appropriate store
+    store.add(newObj)
   },
   addListeners: () => {
     //add listeners
@@ -139,11 +144,12 @@ const APP = {
           //do a fetch call for search results
           console.log("Fetching from the API");
           APP.getData(APP.searchInput);
+          console.log(APP.results)
 
-          //save results to db
-
+          
         } else {
           console.log("Fetching from the DB!");
+          APP.getSearchResults(APP.searchInput)
         }
       };
     }
@@ -178,6 +184,9 @@ const APP = {
         //save the updated results to APP.results
         APP.results = results
         console.log(APP.results)
+
+        //save results to db
+        APP.addResultsToDB(APP.results, 'searchStore')
       })
       .catch((err) => {
         //handle the NetworkError
