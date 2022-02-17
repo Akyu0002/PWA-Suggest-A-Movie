@@ -71,6 +71,14 @@ const APP = {
   },
   getDBResults: (storeName, keyValue) => {
     //return the results from storeName where it matches keyValue
+    console.log("Sending data from IDB")
+    let dbTx = APP.createTransaction(storeName)
+    let store = dbTx.objectStore(storeName)
+    console.log(store)
+    let dbResults = store.get(keyValue)
+
+    console.log(dbResults)
+
   },
   addResultsToDB: (obj, storeName) => {
     //pass in the name of the store
@@ -145,11 +153,11 @@ const APP = {
           console.log("Fetching from the API");
           APP.getData(APP.searchInput);
           console.log(APP.results)
-
           
         } else {
           console.log("Fetching from the DB!");
-          APP.getSearchResults(APP.searchInput)
+          console.log(ev.target.result);
+          APP.getDBResults('searchStore', APP.searchInput)
         }
       };
     }
@@ -209,6 +217,7 @@ const APP = {
     //show the list of previous search keywords as links to results page
   },
   displayCards: () => {
+    
     //display all the movie cards based on the results array
     // in APP.results
     //these results could be from the database or from a fetch
