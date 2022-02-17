@@ -9,10 +9,10 @@ const cacheList = [
   '/results.html',
   '/404.html',
   '/suggest.html',
-  '/css/main.css',
-  '/js/app.js',
-  '/img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg',
-  "/img/GrumpyCat.png",
+  './css/main.css',
+  './js/app.js',
+  './img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg',
+  "./img/GrumpyCat.png",
 ];
 
 self.addEventListener('install', (ev) => {

@@ -5,111 +5,90 @@ const APP = {
   baseURL: "https://api.themoviedb.org/3/",
   imgURL: "",
   results: [],
+  movieID: "",
   searchInput: "",
-
   init: () => {
     //when the page loads
     //open the database
-    APP.openDatabase(APP.registerSW()); //register the service worker after the DB is open
+    APP.openDatabase(APP.registerSW); //register the service worker after the DB is open
   },
-
   registerSW: () => {
+    console.log("Registering Service Worker");
     //register the service worker
     navigator.serviceWorker.register("/sw.js").catch(function (err) {
       console.warn(err);
     });
-    navigator.serviceWorker.ready.then((registration) => {
-      APP.sw = registration.active;
-    });
-    //then add listeners and run page specific code
-    APP.pageSpecific();
-    APP.addListeners();
-  },
 
+    navigator.serviceWorker.ready.then((registration) => {
+      registration.active;
+    });
+
+    //then add listeners and run page specific code
+    APP.addListeners();
+    APP.pageSpecific();
+  },
   openDatabase: (nextStep) => {
-    //open the database
     let version = 1;
+    //open the database
     let dbOpenRequest = indexedDB.open("pwaDB", version);
     //add the update, error, success listeners in here
     dbOpenRequest.onupgradeneeded = function (ev) {
-      DB = ev.target.result;
+      APP.DB = ev.target.result;
 
       try {
-        DB.deleteObjectStore("searchStore");
-        DB.deleteObjectStore("recommendStore");
-      } catch (err) {
-        console.log("error deleting old DB's!");
+        APP.DB.deleteObjectStore("searchStore");
+        APP.DB.deleteObjectStore("reccStore");
+      } catch {
+        console.warn("Can't delete DB's, they might not exist yet!");
       }
-
       //create searchStore with keyword as keyPath
-      let searchOptions = {
+      APP.DB.createObjectStore("searchStore", {
         keyPath: "keyword",
-      };
-
-      let suggestStore = DB.createObjectStore("searchStore", searchOptions);
-      suggestStore.createIndex("by_title", "title", {unique:false})
-
+        autoIncrement: false,
+      });
       //create suggestStore with movieid as keyPath
-      let recommendOptions = {
-        keyPath: "movieid",
-      };
-
-      let recommendStore = DB.createObjectStore(
-        "recommendStore",
-        recommendOptions
-      );
-
-      recommendStore.createIndex("by_title", "title", {unique:false})
+      APP.DB.createObjectStore("reccStore", {
+        keyPath: "movieID",
+        autoIncrement: false,
+      });
     };
+
+    dbOpenRequest.onerror = function (err) {
+      console.log(err.message);
+    };
+
     //call nextStep onsuccess
+    dbOpenRequest.onsuccess = function (ev) {
+      APP.DB = dbOpenRequest.result;
+      console.log(`${APP.DB.name} is ready to be used!`);
+      nextStep();
+    };
   },
   createTransaction: (storeName) => {
-    let tx;
+    let tx = APP.DB.transaction(storeName, "readwrite")
+    console.log({tx})
     //create a transaction to use for some interaction with the database
-    tx = DB.transaction(storeName, "readwrite")
+
     return tx;
   },
   getDBResults: (storeName, keyValue) => {
     //return the results from storeName where it matches keyValue
   },
   addResultsToDB: (obj, storeName) => {
-    console.log(obj)
-    console.log(storeName)
     //pass in the name of the store
-    let index = 0
-    let store = tx.objectStore(storeName);
-    let addRequest = store.add(obj[index]);
-
-    //handle the successful completion of the add
-    addRequest.onsuccess = (ev) => {
-      index++;
-      if (index < movies.length) {
-        console.log("about to add movie", index);
-        addMovies(tx, obj, index);
-        //recursively call the addMovies method
-        //inside the same transaction
-      } else {
-        //done adding all the MOVIES
-      }
-    };
-    addRequest.onerror = (err) => {
-      console.warn("Failed to add", err.message);
-    };
-
     //save the obj passed in to the appropriate store
   },
-
   addListeners: () => {
     //add listeners
     //when the search form is submitted
-    let search = document.getElementById("btnSearch");
-    search.addEventListener("click", APP.searchFormSubmitted);
+    let search = document.getElementById('btnSearch')
+    search.addEventListener('click', APP.searchFormSubmitted)
+
     //when clicking on the list of possible searches on home or 404 page
     //when a message is received
     //when online and offline
-    window.addEventListener("online", APP.changeOnlineStatus);
-    window.addEventListener("offline", APP.changeOnlineStatus);
-
+    window.addEventListener("online", APP.changeStatus);
+    window.addEventListener("offline", APP.changeStatus);
   },
   pageSpecific: () => {
     //anything that happens specifically on each page
@@ -130,13 +109,6 @@ const APP = {
   },
   changeOnlineStatus: (ev) => {
     //when the browser goes online or offline
-    APP.isONLINE = ev.type === "online" ? true : false;
-
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.active.postMessage({
-        ONLINE: APP.isONLINE,
-      });
-    });
   },
   messageReceived: (ev) => {
     //ev.data
@@ -146,22 +118,34 @@ const APP = {
   },
   searchFormSubmitted: (ev) => {
     ev.preventDefault();
-
+    console.log('Working')
     //get the keyword from teh input
     APP.searchInput = document.getElementById('search').value
-    console.log(APP.searchInput)
-    // Make sure it is not empty
-
-      APP.getData(APP.searchInput)
-
-    //check the db for matches
-    //do a fetch call for search results
-
-    //save results to db
 
 
+    //make sure it is not empty
+    if (APP.searchInput === '') {
+      throw new Error('Please enter a search term.')
+    } else {
+
+   //check the db for matches
+   let newTx = APP.createTransaction('searchStore')
+   let searchStore =  newTx.objectStore('searchStore')
+   let getRequest = searchStore.get(APP.searchInput)
+  
+   getRequest.onsuccess = (ev) => {
+
+      if(ev.target.result.results === undefined) {
+        //do a fetch call for search results
+        APP.getData()
+        //save results to db
+      } else {
+
+        console.log('Its in the DB!')
+      }
+    }
+    }
     //navigate to url
-
   },
   cardListClicked: (ev) => {
     // user clicked on a movie card
@@ -172,11 +156,8 @@ const APP = {
     //build a url
     //navigate to the suggest page
   },
-  getData: (endpoint) => {
+  getData: (endpoint, callback) => {
     //do a fetch call to the endpoint
-    console.log(`Fetching data for: ${endpoint}`)
-    let url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
-    console.log(url)
     fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
@@ -189,40 +170,29 @@ const APP = {
         return resp.json();
       })
       .then((contents) => {
-        //remove the properties we don't need
         let results = contents.results;
+        //remove the properties we don't need
         //save the updated results to APP.results
-        APP.results = results;
-        APP.addResultsToDB(results, "searchStore")
-        console.log(APP.results)
         // call the callback
-        
       })
       .catch((err) => {
         //handle the NetworkError
-        console.warn("NOT WORKING")
       });
   },
   getSearchResults: (keyword) => {
     //check if online
-    if (APP.isONLINE == true) {
-
-    } else {
-
-    }
     //check in DB for match of keyword in searchStore
     //if no match in DB do a fetch
     // APP.displayCards is the callback
   },
-  getSuggestedResults: () => {
+  getSuggestedResults: (movieid) => {
     //check if online
     //check in DB for match of movieid in suggestStore
     //if no match in DB do a fetch
     // APP.displayCards is the callback
   },
-  displayListOfSearches: () => {
-    // Show the list of previous search terms.
-    // Data inside of APP.results
+  displayPreviousSearchList: () => {
+    //show the list of previous search keywords as links to results page
   },
   displayCards: () => {
     //display all the movie cards based on the results array
