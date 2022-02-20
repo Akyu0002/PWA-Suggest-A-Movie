@@ -42,21 +42,22 @@ const APP = {
         // Get search term from URL.
         let param = new URL(document.location).searchParams;
         APP.urlKeyword = param.get("keyword");
-
         DATA.getSearchResults(APP.urlKeyword);
 
         // Add Event Listener for clicking on the movie card container.
         let movieCard = document.querySelector(".contentArea");
         movieCard.closest("div");
         movieCard.addEventListener("click", DATA.getMovieID);
-
         break;
 
-      case "suggest":
+      case "recommended":
         console.log("On suggest page.");
         //on the suggest page
+        let movieParam = new URL(document.location).searchParams;
+        APP.movieID = movieParam.get("movieid");
+
+        DATA.getSuggestedResults(APP.movieID);
         //listener for clicking on the movie card container
-        DATA.getSuggestedResults();
         break;
 
       case "fourohfour":
@@ -90,7 +91,7 @@ const SW = {
 
 const IDB = {
   openDatabase: () => {
-    let version = 1;
+    let version = 2;
     //open the database
     let dbOpenRequest = indexedDB.open("pwaDB", version);
     //add the update, error, success listeners in here
@@ -131,32 +132,51 @@ const IDB = {
 
   addToDB: (obj, storeName) => {
     //pass in the name of the store
-    let param = new URL(document.location).searchParams;
-    APP.urlKeyword = param.get("keyword");
+
+    let endpoint;
+    let newObj;
+    let add;
 
     let tx = IDB.createTransaction(storeName);
     let store = tx.objectStore(storeName);
-    let newObj = {
-      keyword: APP.urlKeyword,
-      results: obj,
-    };
+
+    if (storeName === "recommendStore") {
+      console.log("adding to rec store");
+      endpoint = APP.movieID;
+      newObj = {
+        movieID: endpoint,
+        results: obj,
+      };
+    } else {
+      let param = new URL(document.location).searchParams;
+      APP.urlKeyword = param.get("keyword");
+      endpoint = APP.urlKeyword;
+
+      newObj = {
+        keyword: endpoint,
+        results: obj,
+      };
+    }
 
     //save the obj passed in to the appropriate store
-    let add = store.add(newObj);
+    add = store.add(newObj);
 
+    console.log(add);
     add.onsuccess = (ev) => {
       console.log("Added movies to IDB!");
-      DATA.getSearchResults(APP.urlKeyword);
+      console.log(ev);
+      // DATA.getSearchResults(endpoint);
+      BUILD.displayCards(APP.results);
     };
-    add.onerror = (ev) => {
+    add.onerror = (err) => {
+      console.log(err);
       console.warn("Error adding movies to IDB!");
     };
   },
 
-  getFromDB: async (storeName, keyValue) => {
+  getFromDB: (storeName, keyValue) => {
     // Return the results from storeName where it matches keyValue
-    console.log("Sending data from IDB");
-    console.log(`URL Keyword: ${keyValue}`);
+    console.log("Checking data from IDB");
 
     let dbTx = IDB.createTransaction(storeName);
     let store = dbTx.objectStore(storeName);
@@ -167,12 +187,10 @@ const IDB = {
         // Do a fetch call for search results
         console.log("Fetching from the API");
         DATA.fetchData(keyValue);
-        console.log(APP.results);
       } else {
         console.log("Fetching from the DB!");
-        console.log(ev.target.result);
+
         APP.results = ev.target.result.results;
-        console.log(APP.results);
         BUILD.displayCards(APP.results);
       }
     };
@@ -189,15 +207,13 @@ const DATA = {
     // Do a fetch call to the endpoint
     let url;
 
-    console.log(`Fetching data from ${url}`);
-
     if (!isNaN(endpoint)) {
       url = `${APP.baseURL}movie/${endpoint}/recommendations?api_key=${APP.KEY}&language=en-US&page=1`;
-      console.log(url);
     } else {
       url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
     }
 
+    console.log(`Fetching data from ${url}`);
     fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
@@ -210,7 +226,7 @@ const DATA = {
         return resp.json();
       })
       .then((contents) => {
-        console.log("fetch results");
+        console.log("Fetch results");
         // Remove the properties we don't need
         // Save the updated results to APP.results
         APP.results = contents.results;
@@ -224,7 +240,7 @@ const DATA = {
         }
       })
       .catch((err) => {
-        // Handle the NetworkError
+        // Handle the Network Error
         console.warn(err);
         ONLINE.navigate("/404.html");
       });
@@ -246,7 +262,7 @@ const DATA = {
     }
   },
 
-  getSearchResults: async (keyword) => {
+  getSearchResults: (keyword) => {
     console.log("getSearchResults");
 
     IDB.getFromDB("searchStore", keyword);
@@ -254,7 +270,7 @@ const DATA = {
 
   getSuggestedResults: (movieID) => {
     console.log("getSuggestedResults");
-    console.log(movieID);
+    console.log(`Trying to store ID: ${movieID}`);
 
     IDB.getFromDB("recommendStore", movieID);
   },
@@ -264,7 +280,7 @@ const DATA = {
     let div = ev.target.closest("div");
     APP.movieID = div.id;
 
-    DATA.getSuggestedResults(APP.movieID);
+    ONLINE.navigate(`/suggest.html?movieid=${APP.movieID}`);
   },
 };
 
@@ -301,8 +317,6 @@ const BUILD = {
     ol.classList.add("suggestMovieCards");
 
     let df = document.createDocumentFragment();
-
-    console.log(movies);
 
     movies.forEach((movie) => {
       let li = document.createElement("li");
