@@ -7,6 +7,7 @@ const APP = {
   results: [],
   movieID: "",
   searchInput: "",
+  urlKeyword: "",
 
   init: () => {
     IDB.openDatabase();
@@ -37,9 +38,9 @@ const APP = {
       case "results":
         console.log("On results page.");
         let param = new URL(document.location).searchParams;
-        let keyword = param.get("keyword");
+        APP.urlKeyword = param.get("keyword");
 
-        DATA.getSearchResults(keyword);
+        DATA.getSearchResults(APP.urlKeyword);
         //listener for clicking on the movie card container
         break;
 
@@ -122,13 +123,13 @@ const IDB = {
   addToDB: (obj, storeName) => {
     //pass in the name of the store
     let param = new URL(document.location).searchParams;
-    let keyword = param.get("keyword");
-    console.log(`URL Keyword: ${keyword}`)
+    APP.urlKeyword = param.get("keyword");
+    console.log(`URL Keyword: ${APP.urlKeyword}`)
 
     let tx = IDB.createTransaction(storeName);
     let store = tx.objectStore(storeName);
     let newObj = {
-      keyword: keyword,
+      keyword: APP.urlKeyword,
       results: obj,
     };
 
@@ -137,7 +138,7 @@ const IDB = {
 
     add.onsuccess = (ev) => {
       console.log("Added movies to IDB!");
-      DATA.getSearchResults(keyword);
+      DATA.getSearchResults(APP.urlKeyword);
     };
     add.onerror = (ev) => {
       console.warn("Error adding movies to IDB!");
@@ -201,7 +202,7 @@ const DATA = {
 
         // Add API response to IDB
         IDB.addToDB(APP.results, "searchStore");
-        BUILD.displayCards(APP.results);
+        // BUILD.displayCards(APP.results);
       })
       .catch((err) => {
         // Handle the NetworkError
@@ -253,6 +254,14 @@ const ONLINE = {
 const BUILD = {
   displayCards: (movies) => {
     console.log("Building Cards");
+
+    let titleArea = document.querySelector(".titleArea")
+    
+    let title = document.createElement("h2")
+    title.textContent = `Search results for: ${APP.searchInput}`
+    titleArea.append(title)
+
+
     let contentArea = document.querySelector(".contentArea");
     contentArea.innerHTML = "";
 
