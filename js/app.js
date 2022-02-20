@@ -123,6 +123,7 @@ const IDB = {
     //pass in the name of the store
     let param = new URL(document.location).searchParams;
     let keyword = param.get("keyword");
+    console.log(`URL Keyword: ${keyword}`)
 
     let tx = IDB.createTransaction(storeName);
     let store = tx.objectStore(storeName);
@@ -146,6 +147,7 @@ const IDB = {
   getFromDB: async (storeName, keyValue) => {
     // Return the results from storeName where it matches keyValue
     console.log("Sending data from IDB");
+    console.log(`URL Keyword: ${keyValue}`)
 
     let dbTx = IDB.createTransaction(storeName);
     let store = dbTx.objectStore(storeName);
@@ -160,8 +162,9 @@ const IDB = {
       } else {
         console.log("Fetching from the DB!");
         console.log(ev.target.result);
-         APP.results = ev.target.result.results;
+        APP.results = ev.target.result.results;
         console.log(APP.results);
+        BUILD.displayCards(APP.results);
       }
     };
   },
@@ -173,12 +176,12 @@ const IDB = {
 };
 
 const DATA = {
-  fetchData: async (endpoint) => {
+  fetchData:  (endpoint) => {
     // Do a fetch call to the endpoint
     let url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
     console.log(`Fetching data from ${url}`);
 
-    await fetch(url)
+     fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
           throw new NetworkError(
@@ -189,7 +192,7 @@ const DATA = {
         }
         return resp.json();
       })
-      .then(async (contents) => {
+      .then((contents) => {
         console.log("fetch results");
         // Remove the properties we don't need
         // Save the updated results to APP.results
@@ -198,6 +201,7 @@ const DATA = {
 
         // Add API response to IDB
         IDB.addToDB(APP.results, "searchStore");
+        BUILD.displayCards(APP.results);
       })
       .catch((err) => {
         // Handle the NetworkError
@@ -225,11 +229,8 @@ const DATA = {
   getSearchResults: async (keyword) => {
     console.log("getSearchResults");
 
-    await IDB.getFromDB("searchStore", keyword);
+    IDB.getFromDB("searchStore", keyword);
 
-    console.log("On the results page");
-    console.log(APP.results);
-    BUILD.displayCards(APP.results);
   },
 };
 

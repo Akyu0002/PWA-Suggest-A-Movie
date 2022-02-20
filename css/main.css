@@ -96,6 +96,14 @@ form {
   margin: 1rem auto;
 }
 
+ol {
+  padding: 1rem !important;
+  margin: 0 !important;
+}
+
+.card {
+  margin: 0 !important;
+}
 /*************************** Footer ***************************/
 
 footer {
