@@ -1,7 +1,7 @@
 const version = 1;
 let isOnline = true; 
 const staticCache = `PWACache${version}`;
-const dynamicCache = `PWACache${version}`;
+const dynamicCache = `PWADynamicCache${version}`;
 const cacheLimit = 100;
 const cacheList = [
   '/',
@@ -13,6 +13,7 @@ const cacheList = [
   './js/app.js',
   './img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg',
   "./img/GrumpyCat.png",
+  "https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap",
 ];
 
 self.addEventListener('install', (ev) => {
@@ -45,25 +46,28 @@ self.addEventListener('activate', (ev) => {
 });
 
 self.addEventListener('fetch', (ev) => {
+  // console.log(ev)
+  
   ev.respondWith(
-    caches.match(ev.request).then((cacheRes) => {
+    caches.match(ev.request)
+
+    .then((cacheRes) => {
       return (
         cacheRes ||
         fetch(ev.request)
-          .then((fetchRes) => {
-
-            if (! fetchRes.ok) throw new Error(fetchRes.statusText)
+          .then ((fetchRes) => {
+            // console.log(fetchRes)
+            // if (!fetchRes.ok) throw new Error(fetchRes.statusText)
 
             return caches.open(dynamicCache).then((cache) => {
                 let copy = fetchRes.clone();
                 cache.put(ev.request, copy);
-
               return fetchRes;
             });
           })
           .catch((err) => {
-            console.log('SW fetch failed');
-            console.warn(err);
+            // console.log('SW fetch failed');
+            // console.warn(err);
             if(ev.request.mode === 'navigate') {
               return caches.match('/404.html').then(cacheRes => {
                 return cacheRes

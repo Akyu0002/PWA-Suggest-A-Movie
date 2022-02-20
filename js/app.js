@@ -1,33 +1,85 @@
 const APP = {
-  DB: null, //the indexedDB
+  DB: null, // The indexedDB
   isONLINE: "onLine" in navigator && navigator.onLine,
   KEY: "883762e0241bf7da58c9cb6546739dea",
   baseURL: "https://api.themoviedb.org/3/",
-  imgURL: "",
+  imgURL: "http://image.tmdb.org/t/p/w500",
   results: [],
   movieID: "",
   searchInput: "",
+
   init: () => {
-    //when the page loads
-    //open the database
-    APP.openDatabase(APP.registerSW); //register the service worker after the DB is open
+    IDB.openDatabase();
   },
-  registerSW: () => {
+
+  addListeners: () => {
+    // Add Event Listeners:
+    // When the search form is submitted
+    let search = document.getElementById("btnSearch");
+    search.addEventListener("click", DATA.searchFormSubmitted);
+
+    // When clicking on the list of possible searches on home or 404 page
+
+    // When a message is received
+
+    // When online and offline
+    window.addEventListener("online", ONLINE.changeOnlineStatus());
+    window.addEventListener("offline", ONLINE.changeOnlineStatus());
+  },
+
+  pageSpecific: () => {
+    //anything that happens specifically on each page
+
+    switch (document.body.id) {
+      case "home":
+        console.log("On home page.");
+        break;
+      case "results":
+        console.log("On results page.");
+        let param = new URL(document.location).searchParams;
+        let keyword = param.get("keyword");
+
+        DATA.getSearchResults(keyword);
+        //listener for clicking on the movie card container
+        break;
+
+      case "suggest":
+        console.log("On suggest page.");
+        //on the suggest page
+        //listener for clicking on the movie card container
+        break;
+
+      case "fourohfour":
+        console.log("404");
+        break;
+    }
+  },
+};
+
+const SW = {
+  register: () => {
     console.log("Registering Service Worker");
-    //register the service worker
-    navigator.serviceWorker.register("/sw.js").catch(function (err) {
-      console.warn(err);
-    });
 
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.active;
-    });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(function (error) {
+        // Something went wrong during registration. The sw.js file
+        // might be unavailable or contain a syntax error.
+        console.warn(error);
+      });
+      navigator.serviceWorker.ready.then((registration) => {
+        // .ready will never reject... just wait indefinitely
+        registration.active;
+        //save the reference to use later or use .ready again
 
-    //then add listeners and run page specific code
-    APP.addListeners();
-    APP.pageSpecific();
+        APP.addListeners();
+        APP.pageSpecific();
+      });
+    }
   },
-  openDatabase: (nextStep) => {
+};
+
+const IDB = {
+  openDatabase: () => {
     let version = 1;
     //open the database
     let dbOpenRequest = indexedDB.open("pwaDB", version);
@@ -37,17 +89,19 @@ const APP = {
 
       try {
         APP.DB.deleteObjectStore("searchStore");
-        APP.DB.deleteObjectStore("reccStore");
+        APP.DB.deleteObjectStore("recommendStore");
       } catch {
         console.warn("Can't delete DB's, they might not exist yet!");
       }
+
       //create searchStore with keyword as keyPath
       APP.DB.createObjectStore("searchStore", {
         keyPath: "keyword",
         autoIncrement: false,
       });
+
       //create suggestStore with movieid as keyPath
-      APP.DB.createObjectStore("reccStore", {
+      APP.DB.createObjectStore("recommendStore", {
         keyPath: "movieID",
         autoIncrement: false,
       });
@@ -61,121 +115,70 @@ const APP = {
     dbOpenRequest.onsuccess = function (ev) {
       APP.DB = dbOpenRequest.result;
       console.log(`${APP.DB.name} is ready to be used!`);
-      nextStep();
+      SW.register();
+    };
+  },
+
+  addToDB: (obj, storeName) => {
+    //pass in the name of the store
+    let param = new URL(document.location).searchParams;
+    let keyword = param.get("keyword");
+
+    let tx = IDB.createTransaction(storeName);
+    let store = tx.objectStore(storeName);
+    let newObj = {
+      keyword: keyword,
+      results: obj,
+    };
+
+    //save the obj passed in to the appropriate store
+    let add = store.add(newObj);
+
+    add.onsuccess = (ev) => {
+      console.log("Added movies to IDB!");
+      DATA.getSearchResults(keyword);
+    };
+    add.onerror = (ev) => {
+      console.warn("Error adding movies to IDB!");
+    };
+  },
+
+  getFromDB: async (storeName, keyValue) => {
+    // Return the results from storeName where it matches keyValue
+    console.log("Sending data from IDB");
+
+    let dbTx = IDB.createTransaction(storeName);
+    let store = dbTx.objectStore(storeName);
+    let dbResults = store.get(keyValue);
+
+    dbResults.onsuccess = function (ev) {
+      if (ev.target.result === undefined) {
+        // Do a fetch call for search results
+        console.log("Fetching from the API");
+        DATA.fetchData(keyValue);
+        console.log(APP.results);
+      } else {
+        console.log("Fetching from the DB!");
+        console.log(ev.target.result);
+         APP.results = ev.target.result.results;
+        console.log(APP.results);
+      }
     };
   },
   createTransaction: (storeName) => {
-     //create a transaction to use for some interaction with the database
+    // Create a transaction to use for some interaction with the database
     let tx = APP.DB.transaction(storeName, "readwrite");
     return tx;
   },
-  getDBResults: (storeName, keyValue) => {
-    //return the results from storeName where it matches keyValue
-    console.log("Sending data from IDB")
-    let dbTx = APP.createTransaction(storeName)
-    let store = dbTx.objectStore(storeName)
-    console.log(store)
-    let dbResults = store.get(keyValue)
+};
 
-    console.log(dbResults)
-
-  },
-  addResultsToDB: (obj, storeName) => {
-    //pass in the name of the store
-    let tx = APP.createTransaction(storeName)
-    let store = tx.objectStore(storeName);
-    let newObj = {
-      keyword: APP.searchInput,
-      results: obj
-    }
-   
-    //save the obj passed in to the appropriate store
-    store.add(newObj)
-  },
-  addListeners: () => {
-    //add listeners
-    //when the search form is submitted
-    let search = document.getElementById("btnSearch");
-    search.addEventListener("click", APP.searchFormSubmitted);
-
-    //when clicking on the list of possible searches on home or 404 page
-    //when a message is received
-    //when online and offline
-    window.addEventListener("online", APP.changeStatus);
-    window.addEventListener("offline", APP.changeStatus);
-  },
-  pageSpecific: () => {
-    //anything that happens specifically on each page
-    if (document.body.id === "home") {
-      //on the home page
-    }
-    if (document.body.id === "results") {
-      //on the results page
-      //listener for clicking on the movie card container
-    }
-    if (document.body.id === "suggest") {
-      //on the suggest page
-      //listener for clicking on the movie card container
-    }
-    if (document.body.id === "fourohfour") {
-      //on the 404 page
-    }
-  },
-  changeOnlineStatus: (ev) => {
-    //when the browser goes online or offline
-  },
-  messageReceived: (ev) => {
-    //ev.data
-  },
-  sendMessage: (msg) => {
-    //send a message to the service worker
-  },
-  searchFormSubmitted: (ev) => {
-    ev.preventDefault();
-    console.log("Working");
-    //get the keyword from teh input
-    APP.searchInput = document.getElementById("search").value;
-
-    //make sure it is not empty
-    if (APP.searchInput === "") {
-      throw new Error("Please enter a search term.");
-    } else {
-      //check the db for matches
-      let newTx = APP.createTransaction("searchStore");
-      let searchStore = newTx.objectStore("searchStore");
-      let getRequest = searchStore.get(APP.searchInput);
-
-      getRequest.onsuccess = (ev) => {
-        console.log(ev.target);
-
-        if (ev.target.result === undefined) {
-          //do a fetch call for search results
-          console.log("Fetching from the API");
-          APP.getData(APP.searchInput);
-          console.log(APP.results)
-          
-        } else {
-          console.log("Fetching from the DB!");
-          console.log(ev.target.result);
-          APP.getDBResults('searchStore', APP.searchInput)
-        }
-      };
-    }
-    //navigate to url
-  },
-  cardListClicked: (ev) => {
-    // user clicked on a movie card
-    //get the title and movie id
-    //check the db for matches
-    //do a fetch for the suggest results
-    //save results to db
-    //build a url
-    //navigate to the suggest page
-  },
-  getData: (endpoint) => {
-    //do a fetch call to the endpoint
+const DATA = {
+  fetchData: async (endpoint) => {
+    // Do a fetch call to the endpoint
     let url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
-    fetch(url)
+    console.log(`Fetching data from ${url}`);
+
+    await fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
           throw new NetworkError(
@@ -186,54 +189,125 @@ const APP = {
         }
         return resp.json();
       })
-      .then((contents) => {
-        let results = contents.results;
-        //remove the properties we don't need
-        //save the updated results to APP.results
-        APP.results = results
-        console.log(APP.results)
+      .then(async (contents) => {
+        console.log("fetch results");
+        // Remove the properties we don't need
+        // Save the updated results to APP.results
+        APP.results = contents.results;
+        console.log(APP.results);
 
-        //save results to db
-        APP.addResultsToDB(APP.results, 'searchStore')
+        // Add API response to IDB
+        IDB.addToDB(APP.results, "searchStore");
       })
       .catch((err) => {
-        //handle the NetworkError
-        console.warn(err)
+        // Handle the NetworkError
+        console.warn(err);
+        ONLINE.navigate("/404.html");
       });
   },
-  getSearchResults: (keyword) => {
-    //check if online
-    //check in DB for match of keyword in searchStore
-    //if no match in DB do a fetch
-    // APP.displayCards is the callback
+
+  searchFormSubmitted: (ev) => {
+    console.log("Search from submitted.");
+    ev.preventDefault();
+
+    // Get the keyword from the input
+    APP.searchInput = document.getElementById("search").value.toLowerCase();
+
+    // Make sure the input is not empty
+
+    if (APP.searchInput === "") {
+      throw new Error("Please enter a search term!");
+    } else {
+      ONLINE.navigate(`/results.html?keyword=${APP.searchInput}`);
+    }
   },
-  getSuggestedResults: (movieid) => {
-    //check if online
-    //check in DB for match of movieid in suggestStore
-    //if no match in DB do a fetch
-    // APP.displayCards is the callback
-  },
-  displayPreviousSearchList: () => {
-    //show the list of previous search keywords as links to results page
-  },
-  displayCards: () => {
-    
-    //display all the movie cards based on the results array
-    // in APP.results
-    //these results could be from the database or from a fetch
-  },
-  navigate: (url) => {
-    //change the current page
-    window.location = url; //this should include the querystring
+
+  getSearchResults: async (keyword) => {
+    console.log("getSearchResults");
+
+    await IDB.getFromDB("searchStore", keyword);
+
+    console.log("On the results page");
+    console.log(APP.results);
+    BUILD.displayCards(APP.results);
   },
 };
 
-document.addEventListener("DOMContentLoaded", APP.init);
+const ONLINE = {
+  changeOnlineStatus: (ev) => {
+    //when the browser goes online or offline
+    if (APP.isONLINE === true) {
+      console.log(APP.isONLINE);
+    } else {
+      console.log(APP.isONLINE);
+    }
+  },
 
-class NetworkError extends Error {
-  constructor(msg, status, statusText) {
-    super(msg);
-    this.status = status;
-    this.statusText = statusText;
-  }
-}
+  navigate: (url) => {
+    console.log(`Navigating to ${url}`);
+    location.href = url;
+  },
+};
+
+const BUILD = {
+  displayCards: (movies) => {
+    console.log("Building Cards");
+    let contentArea = document.querySelector(".contentArea");
+    contentArea.innerHTML = "";
+
+    let ol = document.createElement("ol");
+    ol.classList.add("suggestMovieCards");
+
+    let df = document.createDocumentFragment();
+
+    console.log(movies);
+
+    movies.forEach((movie) => {
+      let li = document.createElement("li");
+
+      // Main card div
+      let card = document.createElement("div");
+      card.classList.add("card");
+      card.setAttribute("style", "width: 18rem");
+
+      // Image
+      let img = document.createElement("img");
+      // Check if movie has poster or not, if not, set src as placeholder img.
+      if (movie.poster_path === null) {
+        img.src = "../img/GrumpyCat.png";
+        img.alt = "Movie poster not found.";
+      } else {
+        img.src = `${APP.imgURL}${movie.poster_path}`;
+        img.alt = `${movie.original_title}'s movie poster.`;
+      }
+
+      // Card Body
+      let cardBody = document.createElement("div");
+      cardBody.classList.add("card-body");
+
+      // Movie title
+      let title = document.createElement("h2");
+      title.textContent = `${movie.original_title}`;
+
+      // Movie description
+      let movieDesc = document.createElement("p");
+      if (movie.overview === "") {
+        movieDesc.textContent = "No Description Available :(";
+      } else {
+        movieDesc.textContent = `${movie.overview}`;
+      }
+
+      cardBody.append(title, movieDesc);
+      card.append(img, cardBody);
+      li.append(card);
+      df.append(li);
+    });
+    ol.append(df);
+    contentArea.append(ol);
+  },
+};
+
+document.addEventListener("DOMContentLoaded", APP.init());
+
+
+
