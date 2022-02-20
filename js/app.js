@@ -28,26 +28,35 @@ const APP = {
     window.addEventListener("offline", ONLINE.changeOnlineStatus());
   },
 
-  pageSpecific: () => {
-    //anything that happens specifically on each page
+  pageSpecific: (ev) => {
+    // For anything that happens specifically on each page
 
     switch (document.body.id) {
       case "home":
         console.log("On home page.");
         break;
       case "results":
+        // On the results page.
         console.log("On results page.");
+
+        // Get search term from URL.
         let param = new URL(document.location).searchParams;
         APP.urlKeyword = param.get("keyword");
 
         DATA.getSearchResults(APP.urlKeyword);
-        //listener for clicking on the movie card container
+
+        // Add Event Listener for clicking on the movie card container.
+        let movieCard = document.querySelector(".contentArea");
+        movieCard.closest("div");
+        movieCard.addEventListener("click", DATA.getMovieID);
+
         break;
 
       case "suggest":
         console.log("On suggest page.");
         //on the suggest page
         //listener for clicking on the movie card container
+        DATA.getSuggestedResults();
         break;
 
       case "fourohfour":
@@ -124,7 +133,6 @@ const IDB = {
     //pass in the name of the store
     let param = new URL(document.location).searchParams;
     APP.urlKeyword = param.get("keyword");
-    console.log(`URL Keyword: ${APP.urlKeyword}`)
 
     let tx = IDB.createTransaction(storeName);
     let store = tx.objectStore(storeName);
@@ -148,7 +156,7 @@ const IDB = {
   getFromDB: async (storeName, keyValue) => {
     // Return the results from storeName where it matches keyValue
     console.log("Sending data from IDB");
-    console.log(`URL Keyword: ${keyValue}`)
+    console.log(`URL Keyword: ${keyValue}`);
 
     let dbTx = IDB.createTransaction(storeName);
     let store = dbTx.objectStore(storeName);
@@ -177,12 +185,20 @@ const IDB = {
 };
 
 const DATA = {
-  fetchData:  (endpoint) => {
+  fetchData: (endpoint) => {
     // Do a fetch call to the endpoint
-    let url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
+    let url;
+
     console.log(`Fetching data from ${url}`);
 
-     fetch(url)
+    if (!isNaN(endpoint)) {
+      url = `${APP.baseURL}movie/${endpoint}/recommendations?api_key=${APP.KEY}&language=en-US&page=1`;
+      console.log(url);
+    } else {
+      url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
+    }
+
+    fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
           throw new NetworkError(
@@ -201,8 +217,11 @@ const DATA = {
         console.log(APP.results);
 
         // Add API response to IDB
-        IDB.addToDB(APP.results, "searchStore");
-        // BUILD.displayCards(APP.results);
+        if (!isNaN(endpoint)) {
+          IDB.addToDB(APP.results, "recommendStore");
+        } else {
+          IDB.addToDB(APP.results, "searchStore");
+        }
       })
       .catch((err) => {
         // Handle the NetworkError
@@ -231,7 +250,21 @@ const DATA = {
     console.log("getSearchResults");
 
     IDB.getFromDB("searchStore", keyword);
+  },
 
+  getSuggestedResults: (movieID) => {
+    console.log("getSuggestedResults");
+    console.log(movieID);
+
+    IDB.getFromDB("recommendStore", movieID);
+  },
+
+  getMovieID: (ev) => {
+    // Get movie ID
+    let div = ev.target.closest("div");
+    APP.movieID = div.id;
+
+    DATA.getSuggestedResults(APP.movieID);
   },
 };
 
@@ -255,12 +288,11 @@ const BUILD = {
   displayCards: (movies) => {
     console.log("Building Cards");
 
-    let titleArea = document.querySelector(".titleArea")
-    
-    let title = document.createElement("h2")
-    title.textContent = `Search results for: ${APP.searchInput}`
-    titleArea.append(title)
+    let titleArea = document.querySelector(".titleArea");
 
+    let title = document.createElement("h2");
+    title.textContent = `Search results for: ${APP.urlKeyword}`;
+    titleArea.append(title);
 
     let contentArea = document.querySelector(".contentArea");
     contentArea.innerHTML = "";
@@ -279,6 +311,7 @@ const BUILD = {
       let card = document.createElement("div");
       card.classList.add("card");
       card.setAttribute("style", "width: 18rem");
+      card.setAttribute("id", movie.id);
 
       // Image
       let img = document.createElement("img");
@@ -318,6 +351,3 @@ const BUILD = {
 };
 
 document.addEventListener("DOMContentLoaded", APP.init());
-
-
-
