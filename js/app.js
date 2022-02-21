@@ -45,9 +45,9 @@ const APP = {
         DATA.getSearchResults(APP.urlKeyword);
 
         // Add Event Listener for clicking on the movie card container.
-        let movieCard = document.querySelector(".contentArea");
-        movieCard.closest("div");
-        movieCard.addEventListener("click", DATA.getMovieID);
+        let mainCard = document.querySelector(".contentArea");
+        mainCard.closest("div");
+        mainCard.addEventListener("click", DATA.getMovieID);
         break;
 
       case "recommended":
@@ -207,10 +207,18 @@ const DATA = {
     // Do a fetch call to the endpoint
     let url;
 
-    if (!isNaN(endpoint)) {
-      url = `${APP.baseURL}movie/${endpoint}/recommendations?api_key=${APP.KEY}&language=en-US&page=1`;
-    } else {
+    let param = new URL(document.location).searchParams;
+
+    // if (!isNaN(endpoint)) {
+    //   url = `${APP.baseURL}movie/${endpoint}/recommendations?api_key=${APP.KEY}&language=en-US&page=1`;
+    // } else {
+    //   url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
+    // }
+
+    if (param.get("keyword")) {
       url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
+    } else {
+      url = `${APP.baseURL}movie/${endpoint}/recommendations?api_key=${APP.KEY}&language=en-US&page=1`;
     }
 
     console.log(`Fetching data from ${url}`);
@@ -233,11 +241,17 @@ const DATA = {
         console.log(APP.results);
 
         // Add API response to IDB
-        if (!isNaN(endpoint)) {
-          IDB.addToDB(APP.results, "recommendStore");
-        } else {
+
+        if (param.get("keyword")) {
           IDB.addToDB(APP.results, "searchStore");
+        } else {
+          IDB.addToDB(APP.results, "recommendStore");
         }
+        // if (!isNaN(endpoint)) {
+        //   IDB.addToDB(APP.results, "recommendStore");
+        // } else {
+        //   IDB.addToDB(APP.results, "searchStore");
+        // }
       })
       .catch((err) => {
         // Handle the Network Error
