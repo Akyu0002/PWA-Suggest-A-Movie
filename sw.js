@@ -1,5 +1,5 @@
 const version = 1;
-let isOnline = true;
+let isOnline = "onLine" in navigator && navigator.onLine;
 const staticCache = `PWACache${version}`;
 const dynamicCache = `PWADynamicCache${version}`;
 const cacheLimit = 100;
@@ -26,6 +26,11 @@ const cacheList = [
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
   // Favicons
+  "./img/android-chrome-48x48.png",
+  "./img/apple-touch-icon.png",
+  "./img/mstile-150x150.png",
+  "./img/favicon-16x16.png",
+  "./img/favicon-32x32.png",
 ];
 
 self.addEventListener("install", (ev) => {
@@ -50,7 +55,8 @@ self.addEventListener("activate", (ev) => {
                 return true;
               }
             })
-            .map((key) => caches.delete(key))
+            .map((key) => caches.delete(key)),
+          limitCacheSize(dynamicCache, 60)
         );
       })
       .catch(console.warn)
@@ -58,36 +64,80 @@ self.addEventListener("activate", (ev) => {
 });
 
 self.addEventListener("fetch", (ev) => {
-  // console.log(ev)
   ev.respondWith(
     caches.match(ev.request).then((cacheRes) => {
       return (
         cacheRes ||
         fetch(ev.request)
           .then((fetchRes) => {
-            // console.log(fetchRes);
+            //TODO: check here for the 404 error
             if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
-
             return caches.open(dynamicCache).then((cache) => {
-              let copy = fetchRes.clone();
-              cache.put(ev.request, copy);
-              limitCacheSize(dynamicCache, 60);
-              return fetchRes;
+              let copy = fetchRes.clone(); //make a copy of the response
+              cache.put(ev.request, copy); //put the copy into the cache
+              return fetchRes; //send the original response back up the chain
             });
           })
           .catch((err) => {
             console.log("SW fetch failed");
             console.warn(err);
-            if (ev.request.mode === "navigate") {
-              return caches.match("/404.html").then((cacheRes) => {
-                return cacheRes;
+            if (ev.request.mode == "navigate") {
+              //send the 404 page
+              return caches.match("/404.html").then((page404Response) => {
+                return page404Response;
               });
             }
           })
       );
     })
-  );
+  ); //what do we want to send to the browser?
 });
+
+// self.addEventListener("fetch", (ev) => {
+//   ev.respondWith(
+//     caches.match(ev.request).then((cacheRes) => {
+//       if (cacheRes) return cacheRes; // End here if resource is in cache.
+
+//       console.warn(isOnline);
+//       if (!isOnline) {
+//         // Check if not online, if offline go to 404
+//         // let userLocation = location.href.userLocation.replace(
+//         //   "index",
+//         //   "results"
+//         // );
+//         window.location.href = "http://localhost:5501/404.html"; // navigate to 404
+//         return;
+//       } else {
+//         fetch(ev.request)
+//           .then((fetchRes) => {
+//             console.log(fetchRes);
+//             if (fetchRes.status > 399)
+//               throw new NetworkError(
+//                 fetchRes.message,
+//                 fetchRes.request.status,
+//                 fetchRes.statusText
+//               );
+
+//             return caches.open(dynamicCache).then((cache) => {
+//               let copy = fetchRes.clone();
+//               cache.put(ev.request, copy);
+
+//               return fetchRes;
+//             });
+//           })
+//           .catch((err) => {
+//             console.log("SW fetch failed");
+//             console.warn(err);
+//             if (ev.request.mode === "navigate") {
+//               return caches.match("/404.html").then((cacheRes) => {
+//                 return cacheRes;
+//               });
+//             }
+//           });
+//       }
+//     })
+//   );
+// });
 
 self.addEventListener("message", (ev) => {
   console.log(ev.data);
@@ -105,13 +155,14 @@ function sendMessage(msg) {
   });
 }
 
-function limitCacheSize(nm, size) {
+function limitCacheSize(nm, size = 200) {
   //remove some files from the dynamic cache
-  caches.open(nm).then((cache) => {
-    cache.keys().then((keys) => {
-      if (keys.length > size) {
-        cache.delete(keys[0]).then(() => {
-          limitCacheSize(nm, size);
+  return caches.open(nm).then((cache) => {
+    return cache.keys().then((keys) => {
+      let numOfKeys = keys.length;
+      if (numOfKeys > size) {
+        return cache.delete(keys[numOfKeys - 1]).then(() => {
+          return limitCacheSize(nm, size);
         });
       }
     });
@@ -128,4 +179,12 @@ function checkForConnection() {
       clients[0].postMessage(msg);
     }
   });
+}
+
+class NetworkError extends Error {
+  constructor(msg, status, statusText) {
+    super(msg);
+    this.status = status;
+    this.statusText = statusText;
+  }
 }

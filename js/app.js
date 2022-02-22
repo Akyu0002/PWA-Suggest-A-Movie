@@ -8,7 +8,7 @@ const APP = {
   movieID: "",
   searchInput: "",
   urlKeyword: "",
-  recentSearch: "",
+  recentSearch: [],
 
   init: () => {
     IDB.openDatabase();
@@ -36,7 +36,7 @@ const APP = {
     switch (document.body.id) {
       case "home":
         console.log("On home page.");
-        IDB.checkDB("searchStore");
+        IDB.getRecentSearch("searchStore");
         break;
       case "results":
         // On the results page.
@@ -45,7 +45,8 @@ const APP = {
         // Get search term from URL.
         let param = new URL(document.location).searchParams;
         APP.urlKeyword = param.get("keyword");
-        DATA.getSearchResults(APP.urlKeyword);
+        // DATA.getSearchResults(APP.urlKeyword);
+        IDB.getFromDB("searchStore", APP.urlKeyword);
         break;
 
       case "recommended":
@@ -172,7 +173,6 @@ const IDB = {
       console.warn("Error adding movies to IDB!");
     };
   },
-
   getFromDB: (storeName, keyValue) => {
     // Return the results from storeName where it matches keyValue
     console.log("Checking data from IDB");
@@ -201,11 +201,18 @@ const IDB = {
 
     dbResults.onsuccess = function (ev) {
       console.log("Getting search terms from DB!");
-      // APP.recentSearch
-      console.log(ev.target.result);
+      APP.recentSearch = ev.target.result;
+
+      // Build Search items
+      let searchOL = document.querySelector(".recentSearches");
+      APP.recentSearch.forEach((search) => {
+        let searchItem = document.createElement("li");
+        searchItem.textContent =
+          search.charAt(0).toUpperCase() + search.slice(1);
+        searchOL.append(searchItem);
+      });
     };
   },
-
   createTransaction: (storeName) => {
     // Create a transaction to use for some interaction with the database
     let tx = APP.DB.transaction(storeName, "readwrite");
@@ -277,12 +284,6 @@ const DATA = {
     }
   },
 
-  getSearchResults: (keyword) => {
-    console.log("getSearchResults");
-
-    IDB.getFromDB("searchStore", keyword);
-  },
-
   getSuggestedResults: (movieID) => {
     console.log("getSuggestedResults");
 
@@ -293,8 +294,13 @@ const DATA = {
     // Get movie ID
     let div = ev.target.closest(".card");
     APP.movieID = div.id;
+    console.log(div);
 
-    ONLINE.navigate(`/suggest.html?movieid=${APP.movieID}`);
+    ONLINE.navigate(
+      `/suggest.html?movieid=${APP.movieID}&?movie=${div.getAttribute(
+        "moviename"
+      )}`
+    );
   },
 };
 
@@ -354,6 +360,7 @@ const BUILD = {
       card.classList.add("card");
       card.setAttribute("style", "width: 18rem");
       card.setAttribute("id", movie.id);
+      card.setAttribute("movieName", movie.original_title);
 
       // Image
       let img = document.createElement("img");
