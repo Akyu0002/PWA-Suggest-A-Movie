@@ -8,6 +8,7 @@ const APP = {
   movieID: "",
   searchInput: "",
   urlKeyword: "",
+  recentSearch: "",
 
   init: () => {
     IDB.openDatabase();
@@ -35,6 +36,7 @@ const APP = {
     switch (document.body.id) {
       case "home":
         console.log("On home page.");
+        IDB.checkDB("searchStore");
         break;
       case "results":
         // On the results page.
@@ -192,6 +194,18 @@ const IDB = {
       }
     };
   },
+  getRecentSearch: (storeName) => {
+    let dbTx = IDB.createTransaction(storeName);
+    let store = dbTx.objectStore(storeName);
+    let dbResults = store.getAllKeys();
+
+    dbResults.onsuccess = function (ev) {
+      console.log("Getting search terms from DB!");
+      // APP.recentSearch
+      console.log(ev.target.result);
+    };
+  },
+
   createTransaction: (storeName) => {
     // Create a transaction to use for some interaction with the database
     let tx = APP.DB.transaction(storeName, "readwrite");
@@ -271,7 +285,6 @@ const DATA = {
 
   getSuggestedResults: (movieID) => {
     console.log("getSuggestedResults");
-    console.log(`Trying to store ID: ${movieID}`);
 
     IDB.getFromDB("recommendStore", movieID);
   },

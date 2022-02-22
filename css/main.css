@@ -22,10 +22,7 @@ main {
   min-height: 100vh;
   overflow: hidden;
   overflow-y: scroll;
-  padding-top: 8rem;
-}
-
-header {
+  padding-top: 10rem;
 }
 /******************** Header & Search Bar ********************/
 
@@ -133,6 +130,7 @@ h2 {
   display: flex;
   flex-direction: column;
   text-align: center;
+  padding: 2rem;
 }
 
 /* Search & Recommended Content Area */
