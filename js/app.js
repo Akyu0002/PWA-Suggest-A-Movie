@@ -15,6 +15,7 @@ const APP = {
 
   addListeners: () => {
     // Add Event Listeners:
+
     // When the search form is submitted
     let search = document.getElementById("btnSearch");
     search.addEventListener("click", DATA.searchFormSubmitted);
@@ -61,7 +62,7 @@ const APP = {
         break;
 
       case "fourohfour":
-        console.log("404");
+        location.href = "/404.html";
         break;
     }
   },
@@ -209,12 +210,6 @@ const DATA = {
 
     let param = new URL(document.location).searchParams;
 
-    // if (!isNaN(endpoint)) {
-    //   url = `${APP.baseURL}movie/${endpoint}/recommendations?api_key=${APP.KEY}&language=en-US&page=1`;
-    // } else {
-    //   url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
-    // }
-
     if (param.get("keyword")) {
       url = `${APP.baseURL}search/movie?api_key=${APP.KEY}&query=${endpoint}`;
     } else {
@@ -222,6 +217,7 @@ const DATA = {
     }
 
     console.log(`Fetching data from ${url}`);
+
     fetch(url)
       .then((resp) => {
         if (resp.status >= 400) {
@@ -247,11 +243,6 @@ const DATA = {
         } else {
           IDB.addToDB(APP.results, "recommendStore");
         }
-        // if (!isNaN(endpoint)) {
-        //   IDB.addToDB(APP.results, "recommendStore");
-        // } else {
-        //   IDB.addToDB(APP.results, "searchStore");
-        // }
       })
       .catch((err) => {
         // Handle the Network Error
@@ -317,6 +308,7 @@ const ONLINE = {
 const BUILD = {
   displayCards: (movies) => {
     console.log("Building Cards");
+    console.log(movies);
 
     let titleArea = document.querySelector(".titleArea");
 
@@ -325,7 +317,7 @@ const BUILD = {
     titleArea.append(title);
 
     let contentArea = document.querySelector(".contentArea");
-    contentArea.innerHTML = "";
+    // contentArea.innerHTML = "";
 
     let ol = document.createElement("ol");
     ol.classList.add("suggestMovieCards");
@@ -333,6 +325,7 @@ const BUILD = {
     let df = document.createDocumentFragment();
 
     movies.forEach((movie) => {
+      console.log("building cards");
       let li = document.createElement("li");
 
       // Main card div
@@ -345,7 +338,7 @@ const BUILD = {
       let img = document.createElement("img");
       // Check if movie has poster or not, if not, set src as placeholder img.
       if (movie.poster_path === null) {
-        img.src = "../img/GrumpyCat.png";
+        img.src = "https://via.placeholder.com/500x750?text=IMAGE+NOT+FOUND";
         img.alt = "Movie poster not found.";
       } else {
         img.src = `${APP.imgURL}${movie.poster_path}`;

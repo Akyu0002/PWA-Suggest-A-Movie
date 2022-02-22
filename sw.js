@@ -1,4 +1,4 @@
-const version = 1;
+const version = 2;
 let isOnline = true;
 const staticCache = `PWACache${version}`;
 const dynamicCache = `PWADynamicCache${version}`;
@@ -11,9 +11,12 @@ const cacheList = [
   "/suggest.html",
   "./css/main.css",
   "./js/app.js",
+  "./img/home-icon-silhouette-svgrepo-com.svg",
   "./img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg",
   "./img/GrumpyCat.png",
   "https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
 ];
 
 self.addEventListener("install", (ev) => {
@@ -47,36 +50,33 @@ self.addEventListener("activate", (ev) => {
 
 self.addEventListener("fetch", (ev) => {
   // console.log(ev)
-
   ev.respondWith(
-    caches
-      .match(ev.request)
+    caches.match(ev.request).then((cacheRes) => {
+      return (
+        cacheRes ||
+        fetch(ev.request)
+          .then((fetchRes) => {
+            console.log(fetchRes);
+            if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
 
-      .then((cacheRes) => {
-        return (
-          cacheRes ||
-          fetch(ev.request)
-            .then((fetchRes) => {
-              // console.log(fetchRes)
-              // if (!fetchRes.ok) throw new Error(fetchRes.statusText)
-
-              return caches.open(dynamicCache).then((cache) => {
-                let copy = fetchRes.clone();
-                cache.put(ev.request, copy);
-                return fetchRes;
+            return caches.open(dynamicCache).then((cache) => {
+              let copy = fetchRes.clone();
+              cache.put(ev.request, copy);
+              limitCacheSize(dynamicCache, 60);
+              return fetchRes;
+            });
+          })
+          .catch((err) => {
+            console.log("SW fetch failed");
+            console.warn(err);
+            if (ev.request.mode === "navigate") {
+              return caches.match("/404.html").then((cacheRes) => {
+                return cacheRes;
               });
-            })
-            .catch((err) => {
-              // console.log('SW fetch failed');
-              // console.warn(err);
-              if (ev.request.mode === "navigate") {
-                return caches.match("/404.html").then((cacheRes) => {
-                  return cacheRes;
-                });
-              }
-            })
-        );
-      })
+            }
+          })
+      );
+    })
   );
 });
 
@@ -96,23 +96,27 @@ function sendMessage(msg) {
   });
 }
 
-function limitCache() {
+function limitCacheSize(nm, size) {
   //remove some files from the dynamic cache
-  const limitCacheSize = (nm, size = 60) => {
-    caches.open(nm).then((cache) => {
-      cache.keys().then((keys) => {
-        if (keys.length > size) {
-          cache.delete(keys[0]).then(() => {
-            limitCacheSize(nm, size);
-          });
-        }
-      });
+  caches.open(nm).then((cache) => {
+    cache.keys().then((keys) => {
+      if (keys.length > size) {
+        cache.delete(keys[0]).then(() => {
+          limitCacheSize(nm, size);
+        });
+      }
     });
-  };
+  });
 }
 
 function checkForConnection() {
   //try to talk to a server and do a fetch() with HEAD method.
   //to see if we are really online or offline
   //send a message back to the browser
+  self.clients.matchAll().then(function (clients) {
+    if (clients && clients.length) {
+      //Respond to last focused tab
+      clients[0].postMessage(msg);
+    }
+  });
 }
