@@ -20,8 +20,13 @@ body {
 
 main {
   min-height: 100vh;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding-top: 8rem;
 }
 
+header {
+}
 /******************** Header & Search Bar ********************/
 
 header {
@@ -33,7 +38,8 @@ header {
   align-items: center;
   font-size: 1rem;
   border-bottom: 0.5rem solid #01b4e4;
-  /* position: fixed; */
+  position: fixed;
+  z-index: 1;
   top: 0;
   width: 100%;
 }
@@ -120,6 +126,16 @@ h2 {
   justify-content: space-between;
   align-items: center;
 }
+
+/* Home Content Area */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+/* Search & Recommended Content Area */
 
 ol {
   display: flex;
