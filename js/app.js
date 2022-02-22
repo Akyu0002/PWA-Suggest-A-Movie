@@ -25,8 +25,8 @@ const APP = {
     // When a message is received
 
     // When online and offline
-    window.addEventListener("online", ONLINE.changeOnlineStatus());
-    window.addEventListener("offline", ONLINE.changeOnlineStatus());
+    window.addEventListener("online", ONLINE.changeOnlineStatus);
+    window.addEventListener("offline", ONLINE.changeOnlineStatus);
   },
 
   pageSpecific: (ev) => {
@@ -282,7 +282,7 @@ const DATA = {
 
   getMovieID: (ev) => {
     // Get movie ID
-    let div = ev.target.closest("div");
+    let div = ev.target.closest(".card");
     APP.movieID = div.id;
 
     ONLINE.navigate(`/suggest.html?movieid=${APP.movieID}`);
@@ -291,12 +291,22 @@ const DATA = {
 
 const ONLINE = {
   changeOnlineStatus: (ev) => {
+    let onlineStatus = document.querySelector(".onlineStatus");
     //when the browser goes online or offline
-    if (APP.isONLINE === true) {
-      console.log(APP.isONLINE);
-    } else {
-      console.log(APP.isONLINE);
+    console.log(APP.isONLINE);
+    switch (APP.isONLINE) {
+      case true:
+        console.log("Application is ONLINE.");
+        onlineStatus.src = "/img/Online.svg";
+      case false:
+        console.log("Application is OFFLINE.");
+        onlineStatus.src = "/img/Offline.svg";
     }
+    // if (APP.isONLINE === true) {
+    //
+    // } else {
+    //   console.log(APP.isONLINE);
+    // }
   },
 
   navigate: (url) => {

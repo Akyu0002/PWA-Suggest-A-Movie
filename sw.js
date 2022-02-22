@@ -5,18 +5,27 @@ const dynamicCache = `PWADynamicCache${version}`;
 const cacheLimit = 100;
 const cacheList = [
   "/",
+  //HTML Files
   "/index.html",
   "/results.html",
   "/404.html",
   "/suggest.html",
+  // CSS File
   "./css/main.css",
+  // Main JS
   "./js/app.js",
+  // Images
   "./img/home-icon-silhouette-svgrepo-com.svg",
+  "/img/Online.svg",
+  "/img/Offline.svg",
   "./img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg",
   "./img/GrumpyCat.png",
+  // Font
   "https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap",
+  // Bootstrap
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
+  // Favicons
 ];
 
 self.addEventListener("install", (ev) => {
@@ -56,7 +65,7 @@ self.addEventListener("fetch", (ev) => {
         cacheRes ||
         fetch(ev.request)
           .then((fetchRes) => {
-            console.log(fetchRes);
+            // console.log(fetchRes);
             if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
 
             return caches.open(dynamicCache).then((cache) => {

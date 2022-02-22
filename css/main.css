@@ -78,11 +78,11 @@ form {
   gap: 1rem;
 }
 
-.homeBtn {
+.onlineStatus {
   width: 2rem;
 }
 
-.home {
+.online {
   display: flex;
   text-align: center;
   justify-content: center;
@@ -130,7 +130,22 @@ ol {
 }
 
 .card {
-  display: unset;
+  /* display: unset; */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  max-width: 100%;
+}
+
+img {
+  max-width: 100%;
+}
+
+li {
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem 0;
 }
 
 /* Keep all cards the same size */

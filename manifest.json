@@ -1,0 +1,38 @@
+{
+    "name": "Suggest-A-Movie",
+    "short_name": "SAF",
+    "description": "Suggests movies to you based on search results.",
+    "icons": [
+        {
+            "src": "./img/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "./img/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "./img/android-chrome-48x48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "./img/mstile-150x150.png",
+            "sizes": "150x150",
+            "type": "image/png"
+        },
+        {
+            "src": "./img/android-chrome-48x48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        }
+    ],
+    "orientation": "portrait-primary",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "start_url": "/index.html"
+}
+
