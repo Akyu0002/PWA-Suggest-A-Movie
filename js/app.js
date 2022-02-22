@@ -302,11 +302,6 @@ const ONLINE = {
         console.log("Application is OFFLINE.");
         onlineStatus.src = "/img/Offline.svg";
     }
-    // if (APP.isONLINE === true) {
-    //
-    // } else {
-    //   console.log(APP.isONLINE);
-    // }
   },
 
   navigate: (url) => {
@@ -318,16 +313,16 @@ const ONLINE = {
 const BUILD = {
   displayCards: (movies) => {
     console.log("Building Cards");
-    console.log(movies);
 
     let titleArea = document.querySelector(".titleArea");
 
     let title = document.createElement("h2");
-    title.textContent = `Search results for: ${APP.urlKeyword}`;
+    titleText =
+      APP.urlKeyword.charAt(0).toUpperCase() + APP.urlKeyword.slice(1);
+    title.textContent = `Search results for: ${titleText}`;
     titleArea.append(title);
 
     let contentArea = document.querySelector(".contentArea");
-    // contentArea.innerHTML = "";
 
     let ol = document.createElement("ol");
     ol.classList.add("suggestMovieCards");
@@ -335,7 +330,6 @@ const BUILD = {
     let df = document.createDocumentFragment();
 
     movies.forEach((movie) => {
-      console.log("building cards");
       let li = document.createElement("li");
 
       // Main card div
