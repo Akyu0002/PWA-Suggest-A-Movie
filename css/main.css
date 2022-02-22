@@ -79,13 +79,15 @@ form {
 }
 
 .onlineStatus {
-  width: 2rem;
+  width: 1.8rem;
 }
 
-.online {
-  display: flex;
-  text-align: center;
-  justify-content: center;
+a,
+a:hover,
+a:focus,
+a:active {
+  text-decoration: none;
+  color: white;
 }
 
 /*********************** Content Area ***********************/
@@ -160,11 +162,11 @@ li {
 /* -------------------------------- */
 
 /* Card Animations */
-.col:nth-child(2n) {
+.card:nth-child(2n) {
   animation: 1s cubic-bezier(0.46, 0, 0.48, 1.08) 0s 1 slideIn;
 }
 
-.col {
+.card {
   animation: 1s cubic-bezier(0.38, 0, 0, 1.29) 0s 1 slideIn;
 }
 

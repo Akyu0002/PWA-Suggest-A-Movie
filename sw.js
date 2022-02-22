@@ -1,4 +1,4 @@
-const version = 2;
+const version = 1;
 let isOnline = true;
 const staticCache = `PWACache${version}`;
 const dynamicCache = `PWADynamicCache${version}`;

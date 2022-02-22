@@ -44,11 +44,6 @@ const APP = {
         let param = new URL(document.location).searchParams;
         APP.urlKeyword = param.get("keyword");
         DATA.getSearchResults(APP.urlKeyword);
-
-        // Add Event Listener for clicking on the movie card container.
-        let mainCard = document.querySelector(".contentArea");
-        mainCard.closest("div");
-        mainCard.addEventListener("click", DATA.getMovieID);
         break;
 
       case "recommended":
@@ -59,6 +54,7 @@ const APP = {
 
         DATA.getSuggestedResults(APP.movieID);
         //listener for clicking on the movie card container
+
         break;
 
       case "fourohfour":
@@ -380,6 +376,11 @@ const BUILD = {
     });
     ol.append(df);
     contentArea.append(ol);
+
+    // Add Event Listener for clicking on the movie card container.
+    mainCard = document.querySelector(".contentArea");
+    mainCard.closest("div");
+    mainCard.addEventListener("click", DATA.getMovieID);
   },
 };
 
