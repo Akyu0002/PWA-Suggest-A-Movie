@@ -317,9 +317,17 @@ const BUILD = {
     let titleArea = document.querySelector(".titleArea");
 
     let title = document.createElement("h2");
-    titleText =
-      APP.urlKeyword.charAt(0).toUpperCase() + APP.urlKeyword.slice(1);
-    title.textContent = `Search results for: ${titleText}`;
+
+    let param = new URL(document.location).searchParams;
+
+    if (param.get("keyword")) {
+      titleText =
+        APP.urlKeyword.charAt(0).toUpperCase() + APP.urlKeyword.slice(1);
+      title.textContent = `Search results for ${titleText}`;
+    } else {
+      title.textContent = `Movies similar to `;
+    }
+
     titleArea.append(title);
 
     let contentArea = document.querySelector(".contentArea");
