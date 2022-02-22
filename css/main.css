@@ -22,7 +22,7 @@ main {
   min-height: 100vh;
   overflow: hidden;
   overflow-y: scroll;
-  padding-top: 10rem;
+  padding-top: 12rem;
 }
 /******************** Header & Search Bar ********************/
 

@@ -5,15 +5,14 @@ const APP = {
   baseURL: "https://api.themoviedb.org/3/",
   imgURL: "http://image.tmdb.org/t/p/w500",
   results: [],
+  recentSearch: [],
   movieID: "",
   searchInput: "",
   urlKeyword: "",
-  recentSearch: [],
 
   init: () => {
     IDB.openDatabase();
   },
-
   addListeners: () => {
     // Add Event Listeners:
 
@@ -29,7 +28,6 @@ const APP = {
     window.addEventListener("online", ONLINE.changeOnlineStatus);
     window.addEventListener("offline", ONLINE.changeOnlineStatus);
   },
-
   pageSpecific: (ev) => {
     // For anything that happens specifically on each page
 
@@ -55,7 +53,8 @@ const APP = {
         let movieParam = new URL(document.location).searchParams;
         APP.movieID = movieParam.get("movieid");
 
-        DATA.getSuggestedResults(APP.movieID);
+        // DATA.getSuggestedResults(APP.movieID);
+        IDB.getFromDB("recommendStore", APP.movieID);
         //listener for clicking on the movie card container
 
         break;
@@ -129,7 +128,6 @@ const IDB = {
       SW.register();
     };
   },
-
   addToDB: (obj, storeName) => {
     //pass in the name of the store
 
@@ -267,7 +265,6 @@ const DATA = {
         ONLINE.navigate("/404.html");
       });
   },
-
   searchFormSubmitted: (ev) => {
     console.log("Search from submitted.");
     ev.preventDefault();
@@ -283,13 +280,6 @@ const DATA = {
       ONLINE.navigate(`/results.html?keyword=${APP.searchInput}`);
     }
   },
-
-  getSuggestedResults: (movieID) => {
-    console.log("getSuggestedResults");
-
-    IDB.getFromDB("recommendStore", movieID);
-  },
-
   getMovieID: (ev) => {
     // Get movie ID
     let div = ev.target.closest(".card");
@@ -297,7 +287,7 @@ const DATA = {
     console.log(div);
 
     ONLINE.navigate(
-      `/suggest.html?movieid=${APP.movieID}&?movie=${div.getAttribute(
+      `/suggest.html?movieid=${APP.movieID}&movie=${div.getAttribute(
         "moviename"
       )}`
     );
@@ -340,7 +330,8 @@ const BUILD = {
         APP.urlKeyword.charAt(0).toUpperCase() + APP.urlKeyword.slice(1);
       title.textContent = `Search results for ${titleText}`;
     } else {
-      title.textContent = `Movies similar to `;
+      let movieName = param.get("movie");
+      title.textContent = `Movies similar to ${movieName}`;
     }
 
     titleArea.append(title);
