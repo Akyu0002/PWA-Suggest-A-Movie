@@ -1,6 +1,7 @@
 const APP = {
   DB: null, // The indexedDB
-  isONLINE: "onLine" in navigator && navigator.onLine,
+  // isONLINE: "onLine" in navigator && navigator.onLine,
+  isOnline: "",
   KEY: "883762e0241bf7da58c9cb6546739dea",
   baseURL: "https://api.themoviedb.org/3/",
   imgURL: "http://image.tmdb.org/t/p/w500",
@@ -25,8 +26,27 @@ const APP = {
     // When a message is received
 
     // When online and offline
-    window.addEventListener("online", ONLINE.changeOnlineStatus);
-    window.addEventListener("offline", ONLINE.changeOnlineStatus);
+    window.addEventListener("online", (ev) => {
+      APP.isOnline = ev.type;
+
+      // Send message to SW
+      console.log(APP.isOnline);
+      SW.sendMessage(APP.isOnline);
+
+      // Change online/offline icon
+      ONLINE.changeOnlineIcon(APP.isOnline);
+    });
+
+    window.addEventListener("offline", (ev) => {
+      APP.isOnline = ev.type;
+
+      // Send message to SW
+      console.log(APP.isOnline);
+      SW.sendMessage(APP.isOnline);
+
+      // Change online/offline icon
+      ONLINE.changeOnlineIcon(APP.isOnline);
+    });
   },
   pageSpecific: (ev) => {
     // For anything that happens specifically on each page
@@ -88,9 +108,9 @@ const SW = {
       console.log("Service Worker is not available.");
     }
   },
-  sendMessage: () => {
+  sendMessage: (message) => {
     if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage(msg);
+      navigator.serviceWorker.controller.postMessage(message);
     }
   },
 };
@@ -302,17 +322,14 @@ const DATA = {
 };
 
 const ONLINE = {
-  changeOnlineStatus: (ev) => {
+  changeOnlineIcon: (online) => {
     let onlineStatus = document.querySelector(".onlineStatus");
     //when the browser goes online or offline
-    console.log(APP.isONLINE);
-    switch (APP.isONLINE) {
-      case true:
-        console.log("Application is ONLINE.");
-        onlineStatus.src = "/img/Online.svg";
-      case false:
-        console.log("Application is OFFLINE.");
-        onlineStatus.src = "/img/Offline.svg";
+
+    if (online === "online") {
+      onlineStatus.src = "/img/Online.svg";
+    } else {
+      onlineStatus.src = "/img/Offline.svg";
     }
   },
 
