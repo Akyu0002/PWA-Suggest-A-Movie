@@ -95,27 +95,6 @@ a:active {
 
 /*********************** Content Area ***********************/
 
-/* Loader  */
-.loader.active {
-  border: 1rem solid #0d253f;
-  border-top: 1rem solid #01b4e4;
-  border-bottom: 1rem solid #90cea1;
-  border-radius: 50%;
-  width: 7.5rem;
-  height: 7.5rem;
-  animation: spin 2s linear infinite;
-  margin: 0 auto;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 /* Page Title Div Styling*/
 h2 {
   display: flex;
@@ -124,13 +103,16 @@ h2 {
   align-items: center;
 }
 
+.contentArea {
+  text-align: center;
+}
+
 /* Home Content Area */
 
 .home {
   display: flex;
   flex-direction: column;
   text-align: center;
-  padding: 2rem;
 }
 
 /* Search & Recommended Content Area */
@@ -162,6 +144,10 @@ li {
   display: flex;
   justify-content: space-around;
   padding: 1rem 0;
+}
+
+.card-body {
+  text-align: left;
 }
 
 /* Keep all cards the same size */
@@ -219,6 +205,10 @@ footer {
 /************************ Media Queries ************************/
 
 @media screen and (min-width: 37.75em) {
+  main {
+    padding-top: 8rem;
+  }
+
   .actorHeaderDiv {
     display: flex;
     flex-direction: row;

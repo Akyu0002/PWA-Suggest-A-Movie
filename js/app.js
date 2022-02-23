@@ -338,8 +338,7 @@ const BUILD = {
 
     let contentArea = document.querySelector(".contentArea");
 
-    let ol = document.createElement("ol");
-    ol.classList.add("suggestMovieCards");
+    let ol = document.querySelector(".suggestMovieCards");
 
     let df = document.createDocumentFragment();
 
@@ -372,6 +371,10 @@ const BUILD = {
       let title = document.createElement("h2");
       title.textContent = `${movie.original_title}`;
 
+      // Popularity
+      let popularity = document.createElement("p");
+      popularity.textContent = `Rating: ${movie.vote_average}/10`;
+
       // Movie description
       let movieDesc = document.createElement("p");
       if (movie.overview === "") {
@@ -380,7 +383,7 @@ const BUILD = {
         movieDesc.textContent = `${movie.overview}`;
       }
 
-      cardBody.append(title, movieDesc);
+      cardBody.append(title, popularity, movieDesc);
       card.append(img, cardBody);
       li.append(card);
       df.append(li);
