@@ -93,52 +93,6 @@ self.addEventListener("fetch", (ev) => {
   ); //what do we want to send to the browser?
 });
 
-// self.addEventListener("fetch", (ev) => {
-//   ev.respondWith(
-//     caches.match(ev.request).then((cacheRes) => {
-//       if (cacheRes) return cacheRes; // End here if resource is in cache.
-
-//       console.warn(isOnline);
-//       if (!isOnline) {
-//         // Check if not online, if offline go to 404
-//         // let userLocation = location.href.userLocation.replace(
-//         //   "index",
-//         //   "results"
-//         // );
-//         window.location.href = "http://localhost:5501/404.html"; // navigate to 404
-//         return;
-//       } else {
-//         fetch(ev.request)
-//           .then((fetchRes) => {
-//             console.log(fetchRes);
-//             if (fetchRes.status > 399)
-//               throw new NetworkError(
-//                 fetchRes.message,
-//                 fetchRes.request.status,
-//                 fetchRes.statusText
-//               );
-
-//             return caches.open(dynamicCache).then((cache) => {
-//               let copy = fetchRes.clone();
-//               cache.put(ev.request, copy);
-
-//               return fetchRes;
-//             });
-//           })
-//           .catch((err) => {
-//             console.log("SW fetch failed");
-//             console.warn(err);
-//             if (ev.request.mode === "navigate") {
-//               return caches.match("/404.html").then((cacheRes) => {
-//                 return cacheRes;
-//               });
-//             }
-//           });
-//       }
-//     })
-//   );
-// });
-
 self.addEventListener("message", (ev) => {
   console.log(ev.data);
 
@@ -188,3 +142,49 @@ class NetworkError extends Error {
     this.statusText = statusText;
   }
 }
+
+// self.addEventListener("fetch", (ev) => {
+//   ev.respondWith(
+//     caches.match(ev.request).then((cacheRes) => {
+//       if (cacheRes) return cacheRes; // End here if resource is in cache.
+
+//       console.warn(isOnline);
+//       if (!isOnline) {
+//         // Check if not online, if offline go to 404
+//         // let userLocation = location.href.userLocation.replace(
+//         //   "index",
+//         //   "results"
+//         // );
+//         window.location.href = "http://localhost:5501/404.html"; // navigate to 404
+//         return;
+//       } else {
+//         fetch(ev.request)
+//           .then((fetchRes) => {
+//             console.log(fetchRes);
+//             if (fetchRes.status > 399)
+//               throw new NetworkError(
+//                 fetchRes.message,
+//                 fetchRes.request.status,
+//                 fetchRes.statusText
+//               );
+
+//             return caches.open(dynamicCache).then((cache) => {
+//               let copy = fetchRes.clone();
+//               cache.put(ev.request, copy);
+
+//               return fetchRes;
+//             });
+//           })
+//           .catch((err) => {
+//             console.log("SW fetch failed");
+//             console.warn(err);
+//             if (ev.request.mode === "navigate") {
+//               return caches.match("/404.html").then((cacheRes) => {
+//                 return cacheRes;
+//               });
+//             }
+//           });
+//       }
+//     })
+//   );
+// });

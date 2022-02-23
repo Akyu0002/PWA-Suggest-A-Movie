@@ -84,6 +84,13 @@ const SW = {
         APP.addListeners();
         APP.pageSpecific();
       });
+    } else {
+      console.log("Service Worker is not available.");
+    }
+  },
+  sendMessage: () => {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage(msg);
     }
   },
 };
@@ -342,59 +349,66 @@ const BUILD = {
 
     let df = document.createDocumentFragment();
 
-    movies.forEach((movie) => {
-      let li = document.createElement("li");
+    if (movies.length > 0) {
+      movies.forEach((movie) => {
+        let li = document.createElement("li");
 
-      // Main card div
-      let card = document.createElement("div");
-      card.classList.add("card");
-      card.setAttribute("style", "width: 18rem");
-      card.setAttribute("id", movie.id);
-      card.setAttribute("movieName", movie.original_title);
+        // Main card div
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.setAttribute("style", "width: 18rem");
+        card.setAttribute("id", movie.id);
+        card.setAttribute("movieName", movie.original_title);
 
-      // Image
-      let img = document.createElement("img");
-      // Check if movie has poster or not, if not, set src as placeholder img.
-      if (movie.poster_path === null) {
-        img.src = "https://via.placeholder.com/500x750?text=IMAGE+NOT+FOUND";
-        img.alt = "Movie poster not found.";
-      } else {
-        img.src = `${APP.imgURL}${movie.poster_path}`;
-        img.alt = `${movie.original_title}'s movie poster.`;
-      }
+        // Image
+        let img = document.createElement("img");
+        // Check if movie has poster or not, if not, set src as placeholder img.
+        if (movie.poster_path === null) {
+          img.src = "https://via.placeholder.com/500x750?text=IMAGE+NOT+FOUND";
+          img.alt = "Movie poster not found.";
+        } else {
+          img.src = `${APP.imgURL}${movie.poster_path}`;
+          img.alt = `${movie.original_title}'s movie poster.`;
+        }
 
-      // Card Body
-      let cardBody = document.createElement("div");
-      cardBody.classList.add("card-body");
+        // Card Body
+        let cardBody = document.createElement("div");
+        cardBody.classList.add("card-body");
 
-      // Movie title
-      let title = document.createElement("h2");
-      title.textContent = `${movie.original_title}`;
+        // Movie title
+        let title = document.createElement("h2");
+        title.textContent = `${movie.original_title}`;
 
-      // Popularity
-      let popularity = document.createElement("p");
-      popularity.textContent = `Rating: ${movie.vote_average}/10`;
+        // Popularity
+        let popularity = document.createElement("p");
+        popularity.textContent = `Rating: ${movie.vote_average}/10`;
 
-      // Movie description
-      let movieDesc = document.createElement("p");
-      if (movie.overview === "") {
-        movieDesc.textContent = "No Description Available :(";
-      } else {
-        movieDesc.textContent = `${movie.overview}`;
-      }
+        // Movie description
+        let movieDesc = document.createElement("p");
+        if (movie.overview === "") {
+          movieDesc.textContent = "No Description Available :(";
+        } else {
+          movieDesc.textContent = `${movie.overview}`;
+        }
 
-      cardBody.append(title, popularity, movieDesc);
-      card.append(img, cardBody);
-      li.append(card);
-      df.append(li);
-    });
-    ol.append(df);
-    contentArea.append(ol);
+        cardBody.append(title, popularity, movieDesc);
+        card.append(img, cardBody);
+        li.append(card);
+        df.append(li);
+      });
+      ol.append(df);
+      contentArea.append(ol);
 
-    // Add Event Listener for clicking on the movie card container.
-    mainCard = document.querySelector(".contentArea");
-    mainCard.closest("div");
-    mainCard.addEventListener("click", DATA.getMovieID);
+      // Add Event Listener for clicking on the movie card container.
+      mainCard = document.querySelector(".contentArea");
+      mainCard.closest("div");
+      mainCard.addEventListener("click", DATA.getMovieID);
+    } else {
+      console.warn("NO MOVIES");
+      let message = document.createElement("p");
+      message.textContent = "No content available.";
+      ol.append(message);
+    }
   },
 };
 
