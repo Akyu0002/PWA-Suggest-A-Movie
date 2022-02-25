@@ -2,7 +2,8 @@ const version = 1;
 let isOnline = "onLine" in navigator && navigator.onLine;
 const staticCache = `PWACache${version}`;
 const dynamicCache = `PWADynamicCache${version}`;
-const cacheLimit = 100;
+const imageCache = `PWAImageCache${version}`;
+const cacheLimit = 40;
 const cacheList = [
   "/",
   //HTML Files
@@ -55,8 +56,7 @@ self.addEventListener("activate", (ev) => {
                 return true;
               }
             })
-            .map((key) => caches.delete(key)),
-          limitCacheSize(dynamicCache, 60)
+            .map((key) => caches.delete(key))
         );
       })
       .catch(console.warn)
@@ -71,14 +71,31 @@ self.addEventListener("fetch", (ev) => {
         fetch(ev.request)
           .then((fetchRes) => {
             //TODO: check here for the 404 error
+            // Make a third cache for images only
             if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
-            return caches.open(dynamicCache).then((cache) => {
-              let copy = fetchRes.clone(); //make a copy of the response
-              cache.put(ev.request, copy); //put the copy into the cache
-              return fetchRes; //send the original response back up the chain
-            });
+
+            if (fetchRes.type === "opaque") {
+              return caches.open(imageCache).then((cache) => {
+                let copy = fetchRes.clone(); //make a copy of the response
+                cache.put(ev.request, copy); //put the copy into the cache
+
+                cache.keys().then((key) => {
+                  if (key.length > cacheLimit) {
+                    limitCacheSize(imageCache);
+                  }
+                });
+
+                return fetchRes; //send the original response back up the chain
+              });
+            } else {
+              return caches.open(dynamicCache).then((cache) => {
+                let copy = fetchRes.clone(); //make a copy of the response
+                cache.put(ev.request, copy); //put the copy into the cache
+                return fetchRes; //send the original response back up the chain
+              });
+            }
           })
-          .catch((err) => {
+          .catch(async (err) => {
             console.log("SW fetch failed");
             console.warn(err);
             if (ev.request.mode == "navigate") {
@@ -109,8 +126,9 @@ function sendMessage(msg) {
   });
 }
 
-function limitCacheSize(nm, size = 200) {
+function limitCacheSize(nm, size = 40) {
   //remove some files from the dynamic cache
+
   return caches.open(nm).then((cache) => {
     return cache.keys().then((keys) => {
       let numOfKeys = keys.length;
@@ -134,7 +152,6 @@ function checkForConnection() {
     }
   });
 }
-
 class NetworkError extends Error {
   constructor(msg, status, statusText) {
     super(msg);
@@ -144,9 +161,13 @@ class NetworkError extends Error {
 }
 
 // self.addEventListener("fetch", (ev) => {
+//   console.log(ev);
 //   ev.respondWith(
-//     caches.match(ev.request).then((cacheRes) => {
-//       if (cacheRes) return cacheRes; // End here if resource is in cache.
+//     caches.match(ev.request.url).then((cacheRes) => {
+//       console.log(cacheRes);
+//       if (cacheRes) {
+//         return cacheRes;
+//       } // End here if resource is in cache.
 
 //       console.warn(isOnline);
 //       if (!isOnline) {
@@ -155,23 +176,25 @@ class NetworkError extends Error {
 //         //   "index",
 //         //   "results"
 //         // );
-//         window.location.href = "http://localhost:5501/404.html"; // navigate to 404
+//         location.href = "http://localhost:5501/404.html"; // navigate to 404
 //         return;
 //       } else {
 //         fetch(ev.request)
 //           .then((fetchRes) => {
 //             console.log(fetchRes);
+//             console.warn(ev.request);
 //             if (fetchRes.status > 399)
 //               throw new NetworkError(
 //                 fetchRes.message,
 //                 fetchRes.request.status,
 //                 fetchRes.statusText
 //               );
+//             // if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
 
 //             return caches.open(dynamicCache).then((cache) => {
 //               let copy = fetchRes.clone();
 //               cache.put(ev.request, copy);
-
+//               limitCacheSize(dynamicCache);
 //               return fetchRes;
 //             });
 //           })

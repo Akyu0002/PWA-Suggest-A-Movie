@@ -324,7 +324,7 @@ const DATA = {
 const ONLINE = {
   changeOnlineIcon: (online) => {
     let onlineStatus = document.querySelector(".onlineStatus");
-    //when the browser goes online or offline
+    // Check if the browser goes online or offline
 
     if (online === "online") {
       onlineStatus.src = "/img/Online.svg";
