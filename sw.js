@@ -17,6 +17,7 @@ const cacheList = [
   "./js/app.js",
   // Images
   "./img/SAM.svg",
+  "./img/404 SAM.svg",
   "./img/Online.svg",
   "./img/Offline.svg",
   "./img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg",

@@ -54,6 +54,8 @@ const APP = {
     switch (document.body.id) {
       case "home":
         console.log("On home page.");
+
+        // Display recent searches
         IDB.getRecentSearch("searchStore");
         break;
       case "results":
@@ -76,6 +78,9 @@ const APP = {
         // DATA.getSuggestedResults(APP.movieID);
         IDB.getFromDB("recommendStore", APP.movieID);
         //listener for clicking on the movie card container
+
+        // Display recent searches
+        IDB.getRecentSearch("searchStore");
 
         break;
 
@@ -395,7 +400,7 @@ const BUILD = {
         cardBody.classList.add("card-body");
 
         // Movie title
-        let title = document.createElement("h2");
+        let title = document.createElement("h3");
         title.textContent = `${movie.original_title}`;
 
         // Popularity
@@ -423,8 +428,8 @@ const BUILD = {
       mainCard.closest("div");
       mainCard.addEventListener("click", DATA.getMovieID);
     } else {
-      console.warn("NO MOVIES");
       let message = document.createElement("p");
+      message.classList.add("noMovieMsg");
       message.textContent = "No content available.";
       ol.append(message);
     }
