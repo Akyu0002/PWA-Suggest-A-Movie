@@ -376,11 +376,11 @@ const BUILD = {
     if (movies.length > 0) {
       movies.forEach((movie) => {
         let li = document.createElement("li");
-        li.classList.add("flexSizing");
+        li.classList.add("cardLi");
 
         // Main card div
         let card = document.createElement("div");
-        card.classList.add("card");
+        card.classList.add("card", "d-flex");
         card.setAttribute("style", "width: 18rem");
         card.setAttribute("id", movie.id);
         card.setAttribute("movieName", movie.original_title);

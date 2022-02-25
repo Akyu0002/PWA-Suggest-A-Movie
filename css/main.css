@@ -122,6 +122,10 @@ ol {
   list-style-type: none;
 }
 
+img {
+  max-width: 100%;
+}
+
 .card {
   justify-content: center;
   align-items: center;
@@ -130,20 +134,12 @@ ol {
   min-height: 3rem;
 }
 
-img {
-  max-width: 100%;
-}
-
-li {
-  /* display: flex;
-  justify-content: space-around; */
+.cardLi {
   padding: 1rem 0;
 }
 
-.card-body {
-  text-align: left;
+.card {
 }
-
 .suggestMovieCards {
   flex-direction: row;
   flex-wrap: wrap;
@@ -154,7 +150,8 @@ li {
 
 /* Keep all cards the same size */
 .card-body {
-  flex: 1 1 15rem;
+  text-align: left;
+  flex: 1 1 19rem;
 }
 
 /* -------------------------------- */
