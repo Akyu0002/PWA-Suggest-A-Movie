@@ -376,6 +376,7 @@ const BUILD = {
     if (movies.length > 0) {
       movies.forEach((movie) => {
         let li = document.createElement("li");
+        li.classList.add("flexSizing");
 
         // Main card div
         let card = document.createElement("div");
@@ -407,15 +408,11 @@ const BUILD = {
         let popularity = document.createElement("p");
         popularity.textContent = `Rating: ${movie.vote_average}/10`;
 
-        // Movie description
-        let movieDesc = document.createElement("p");
-        if (movie.overview === "") {
-          movieDesc.textContent = "No Description Available :(";
-        } else {
-          movieDesc.textContent = `${movie.overview}`;
-        }
+        // Movie Release Date
+        let movieDate = document.createElement("p");
+        movieDate.textContent = `${movie.release_date}`;
 
-        cardBody.append(title, popularity, movieDesc);
+        cardBody.append(title, popularity, movieDate);
         card.append(img, cardBody);
         li.append(card);
         df.append(li);
