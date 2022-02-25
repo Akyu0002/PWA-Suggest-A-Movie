@@ -165,20 +165,22 @@ const IDB = {
     let tx = IDB.createTransaction(storeName);
     let store = tx.objectStore(storeName);
 
+    let param = new URL(document.location).searchParams;
+
     if (storeName === "recommendStore") {
-      console.log("adding to rec store");
-      endpoint = APP.movieID;
+      console.log("adding to recommend store");
+      APP.urlKeyword = param.get("movie");
       newObj = {
-        movieID: endpoint,
+        movieID: APP.movieID,
         results: obj,
+        tile: APP.urlKeyword,
       };
     } else {
-      let param = new URL(document.location).searchParams;
+      console.log("adding to search store");
       APP.urlKeyword = param.get("keyword");
-      endpoint = APP.urlKeyword;
 
       newObj = {
-        keyword: endpoint,
+        keyword: APP.urlKeyword,
         results: obj,
       };
     }

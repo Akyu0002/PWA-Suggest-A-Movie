@@ -1,8 +1,8 @@
 const version = 1;
 let isOnline = "onLine" in navigator && navigator.onLine;
-const staticCache = `PWACache${version}`;
-const dynamicCache = `PWADynamicCache${version}`;
-const imageCache = `PWAImageCache${version}`;
+const staticCache = `PWA-Cache${version}`;
+const dynamicCache = `PWA-DynamicCache${version}`;
+const imgDynamicCache = `PWA-DyanmicImageCache${version}`;
 const cacheLimit = 40;
 const cacheList = [
   "/",
@@ -16,17 +16,18 @@ const cacheList = [
   // Main JS
   "./js/app.js",
   // Images
-  "./img/home-icon-silhouette-svgrepo-com.svg",
+  "./img/SAM.svg",
   "./img/Online.svg",
   "./img/Offline.svg",
   "./img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg",
-  "./img/GrumpyCat.png",
   // Font
   "https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap",
   // Bootstrap
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
   // Favicons
+  "./img/android-chrome-512x512.png",
+  "./img/android-chrome-192x192.png",
   "./img/android-chrome-48x48.png",
   "./img/apple-touch-icon.png",
   "./img/mstile-150x150.png",
@@ -75,13 +76,13 @@ self.addEventListener("fetch", (ev) => {
             if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
 
             if (fetchRes.type === "opaque") {
-              return caches.open(imageCache).then((cache) => {
+              return caches.open(imgDynamicCache).then((cache) => {
                 let copy = fetchRes.clone(); //make a copy of the response
                 cache.put(ev.request, copy); //put the copy into the cache
 
                 cache.keys().then((key) => {
                   if (key.length > cacheLimit) {
-                    limitCacheSize(imageCache);
+                    limitCacheSize(imgDynamicCache);
                   }
                 });
 
@@ -159,55 +160,3 @@ class NetworkError extends Error {
     this.statusText = statusText;
   }
 }
-
-// self.addEventListener("fetch", (ev) => {
-//   console.log(ev);
-//   ev.respondWith(
-//     caches.match(ev.request.url).then((cacheRes) => {
-//       console.log(cacheRes);
-//       if (cacheRes) {
-//         return cacheRes;
-//       } // End here if resource is in cache.
-
-//       console.warn(isOnline);
-//       if (!isOnline) {
-//         // Check if not online, if offline go to 404
-//         // let userLocation = location.href.userLocation.replace(
-//         //   "index",
-//         //   "results"
-//         // );
-//         location.href = "http://localhost:5501/404.html"; // navigate to 404
-//         return;
-//       } else {
-//         fetch(ev.request)
-//           .then((fetchRes) => {
-//             console.log(fetchRes);
-//             console.warn(ev.request);
-//             if (fetchRes.status > 399)
-//               throw new NetworkError(
-//                 fetchRes.message,
-//                 fetchRes.request.status,
-//                 fetchRes.statusText
-//               );
-//             // if (fetchRes.status > 399) throw new Error(fetchRes.statusText);
-
-//             return caches.open(dynamicCache).then((cache) => {
-//               let copy = fetchRes.clone();
-//               cache.put(ev.request, copy);
-//               limitCacheSize(dynamicCache);
-//               return fetchRes;
-//             });
-//           })
-//           .catch((err) => {
-//             console.log("SW fetch failed");
-//             console.warn(err);
-//             if (ev.request.mode === "navigate") {
-//               return caches.match("/404.html").then((cacheRes) => {
-//                 return cacheRes;
-//               });
-//             }
-//           });
-//       }
-//     })
-//   );
-// });

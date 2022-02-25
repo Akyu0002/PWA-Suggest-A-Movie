@@ -14,9 +14,6 @@ html {
   font-size: 20px;
   line-height: 1.5;
 }
-body {
-  min-height: 100vh;
-}
 
 main {
   min-height: 100vh;
@@ -107,15 +104,19 @@ h2 {
   text-align: center;
 }
 
-/* Home Content Area */
+/************************* Home Page ************************/
 
 .home {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   text-align: center;
 }
 
-/* Search & Recommended Content Area */
+.homeSam {
+  width: 5rem;
+}
+
+/******************* Search & Recommended *******************/
 
 ol {
   display: flex;
@@ -207,6 +208,11 @@ footer {
 @media screen and (min-width: 37.75em) {
   main {
     padding-top: 8rem;
+  }
+
+  .home .contentArea {
+    margin: 0 auto;
+    justify-content: space-around;
   }
 
   .actorHeaderDiv {
