@@ -4,7 +4,7 @@ const APP = {
   isOnline: "",
   KEY: "883762e0241bf7da58c9cb6546739dea",
   baseURL: "https://api.themoviedb.org/3/",
-  imgURL: "http://image.tmdb.org/t/p/w500",
+  imgURL: "https://image.tmdb.org/t/p/w500",
   results: [],
   recentSearch: [],
   movieID: "",
