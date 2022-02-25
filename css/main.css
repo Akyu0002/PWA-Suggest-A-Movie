@@ -127,6 +127,7 @@ ol {
   align-items: center;
   text-align: center;
   max-width: 100%;
+  min-height: 3rem;
 }
 
 img {
@@ -203,7 +204,7 @@ footer {
 
 @media screen and (min-width: 37.75em) {
   main {
-    padding-top: 8rem;
+    padding-top: 10rem;
   }
 
   .home {
