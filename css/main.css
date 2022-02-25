@@ -138,8 +138,6 @@ img {
   padding: 1rem 0;
 }
 
-.card {
-}
 .suggestMovieCards {
   flex-direction: row;
   flex-wrap: wrap;
@@ -265,14 +263,12 @@ h1 {
   font-size: 1.802rem;
   text-align: center;
   font-weight: normal;
-  text-transform: uppercase;
   margin: 0;
 }
 
 h2 {
   font-size: 1.602rem;
   font-weight: normal;
-  text-transform: uppercase;
   margin: 0 0 1.5rem;
 }
 

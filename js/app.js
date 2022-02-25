@@ -30,7 +30,6 @@ const APP = {
       APP.isOnline = ev.type;
 
       // Send message to SW
-      console.log(APP.isOnline);
       SW.sendMessage(APP.isOnline);
 
       // Change online/offline icon
@@ -41,7 +40,6 @@ const APP = {
       APP.isOnline = ev.type;
 
       // Send message to SW
-      console.log(APP.isOnline);
       SW.sendMessage(APP.isOnline);
 
       // Change online/offline icon
@@ -193,11 +191,9 @@ const IDB = {
     //save the obj passed in to the appropriate store
     add = store.add(newObj);
 
-    console.log(add);
     add.onsuccess = (ev) => {
       console.log("Added movies to IDB!");
-      console.log(ev);
-      // DATA.getSearchResults(endpoint);
+
       BUILD.displayCards(APP.results);
     };
     add.onerror = (err) => {
@@ -318,7 +314,6 @@ const DATA = {
     // Get movie ID
     let div = ev.target.closest(".card");
     APP.movieID = div.id;
-    console.log(div);
 
     ONLINE.navigate(
       `/suggest.html?movieid=${APP.movieID}&movie=${div.getAttribute(
@@ -359,10 +354,10 @@ const BUILD = {
     if (param.get("keyword")) {
       titleText =
         APP.urlKeyword.charAt(0).toUpperCase() + APP.urlKeyword.slice(1);
-      title.textContent = `Search results for ${titleText}`;
+      title.textContent = `Search results for: ${titleText}`;
     } else {
       let movieName = param.get("movie");
-      title.textContent = `Movies similar to ${movieName}`;
+      title.textContent = `Movies similar to: ${movieName}`;
     }
 
     titleArea.append(title);
@@ -410,7 +405,7 @@ const BUILD = {
 
         // Movie Release Date
         let movieDate = document.createElement("p");
-        movieDate.textContent = `${movie.release_date}`;
+        movieDate.textContent = `Released: ${movie.release_date}`;
 
         cardBody.append(title, popularity, movieDate);
         card.append(img, cardBody);
