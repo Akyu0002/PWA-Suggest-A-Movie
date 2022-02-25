@@ -18,15 +18,13 @@ const cacheList = [
   // Images
   "./img/SAM.svg",
   "./img/404 SAM.svg",
-  "./img/Online.svg",
-  "./img/Offline.svg",
   "./img/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg",
   // Font
   "https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap",
   // Bootstrap
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
-  // Favicons
+  // Icons + Favicon
   "./img/android-chrome-512x512.png",
   "./img/android-chrome-192x192.png",
   "./img/android-chrome-48x48.png",
@@ -86,7 +84,6 @@ self.addEventListener("fetch", (ev) => {
                     limitCacheSize(imgDynamicCache);
                   }
                 });
-
                 return fetchRes; //send the original response back up the chain
               });
             } else {

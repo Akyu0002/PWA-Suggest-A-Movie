@@ -21,29 +21,21 @@ const APP = {
     let search = document.getElementById("btnSearch");
     search.addEventListener("click", DATA.searchFormSubmitted);
 
-    // When clicking on the list of possible searches on home or 404 page
-
-    // When a message is received
-
     // When online and offline
+    console.warn("PWA Online");
     window.addEventListener("online", (ev) => {
       APP.isOnline = ev.type;
 
       // Send message to SW
       SW.sendMessage(APP.isOnline);
-
-      // Change online/offline icon
-      ONLINE.changeOnlineIcon(APP.isOnline);
     });
 
     window.addEventListener("offline", (ev) => {
       APP.isOnline = ev.type;
+      console.warn("PWA Offline");
 
       // Send message to SW
       SW.sendMessage(APP.isOnline);
-
-      // Change online/offline icon
-      ONLINE.changeOnlineIcon(APP.isOnline);
     });
   },
   pageSpecific: (ev) => {
@@ -324,17 +316,6 @@ const DATA = {
 };
 
 const ONLINE = {
-  changeOnlineIcon: (online) => {
-    let onlineStatus = document.querySelector(".onlineStatus");
-    // Check if the browser goes online or offline
-
-    if (online === "online") {
-      onlineStatus.src = "/img/Online.svg";
-    } else {
-      onlineStatus.src = "/img/Offline.svg";
-    }
-  },
-
   navigate: (url) => {
     console.log(`Navigating to ${url}`);
     location.href = url;
