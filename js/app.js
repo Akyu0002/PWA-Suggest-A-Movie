@@ -73,7 +73,7 @@ const APP = {
 
       case "fourohfour":
         console.log("On 404 Page");
-
+        window.history.pushState("404", "404", "/404.html");
         break;
     }
   },
