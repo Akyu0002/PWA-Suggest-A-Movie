@@ -22,7 +22,6 @@ const APP = {
     search.addEventListener("click", DATA.searchFormSubmitted);
 
     // When online and offline
-    console.warn("PWA Online");
     window.addEventListener("online", (ev) => {
       APP.isOnline = ev.type;
 
@@ -32,8 +31,6 @@ const APP = {
 
     window.addEventListener("offline", (ev) => {
       APP.isOnline = ev.type;
-      console.warn("PWA Offline");
-
       // Send message to SW
       SW.sendMessage(APP.isOnline);
     });
@@ -227,8 +224,14 @@ const IDB = {
       let searchOL = document.querySelector(".recentSearches");
       APP.recentSearch.forEach((search) => {
         let searchItem = document.createElement("li");
-        searchItem.textContent =
+        let searchLink = document.createElement("a");
+
+        // Make first letter capital for better visuals.
+        searchLink.textContent =
           search.charAt(0).toUpperCase() + search.slice(1);
+        searchLink.setAttribute("href", `/results.html?keyword=${search}`);
+
+        searchItem.append(searchLink);
         searchOL.append(searchItem);
       });
     };
@@ -352,7 +355,7 @@ const BUILD = {
     if (movies.length > 0) {
       movies.forEach((movie) => {
         let li = document.createElement("li");
-        li.classList.add("cardLi");
+        li.classList.add("cardLi", "d-flex");
 
         // Main card div
         let card = document.createElement("div");

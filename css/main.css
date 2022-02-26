@@ -96,6 +96,7 @@ h2 {
 
 .contentArea {
   text-align: center;
+  justify-content: space-around;
 }
 
 /************************* Home Page ************************/
@@ -136,6 +137,8 @@ img {
 
 .cardLi {
   padding: 1rem 0;
+  /* display: flex; */
+  justify-content: space-around;
 }
 
 .suggestMovieCards {
@@ -150,6 +153,7 @@ img {
 .card-body {
   text-align: left;
   flex: 1 1 19rem;
+  width: 100%;
 }
 
 /* -------------------------------- */

@@ -32,6 +32,8 @@ const cacheList = [
   "./img/mstile-150x150.png",
   "./img/favicon-16x16.png",
   "./img/favicon-32x32.png",
+  // Web Manifest File
+  "./manifest.json",
 ];
 
 self.addEventListener("install", (ev) => {
