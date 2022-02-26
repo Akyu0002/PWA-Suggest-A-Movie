@@ -74,6 +74,7 @@ const APP = {
       case "fourohfour":
         console.log("On 404 Page");
         window.history.pushState("404", "404", "/404.html");
+        IDB.getRecentSearch("searchStore");
         break;
     }
   },
@@ -151,7 +152,6 @@ const IDB = {
   addToDB: (obj, storeName) => {
     //pass in the name of the store
 
-    let endpoint;
     let newObj;
     let add;
 
@@ -370,7 +370,7 @@ const BUILD = {
         let img = document.createElement("img");
         // Check if movie has poster or not, if not, set src as placeholder img.
         if (movie.poster_path === null) {
-          img.src = "https://via.placeholder.com/500x750?text=IMAGE+NOT+FOUND";
+          img.src = "./img/placeholder.png";
           img.alt = "Movie poster not found.";
         } else {
           img.src = `${APP.imgURL}${movie.poster_path}`;
@@ -403,7 +403,7 @@ const BUILD = {
 
       // Add Event Listener for clicking on the movie card container.
       mainCard = document.querySelector(".contentArea");
-      mainCard.closest("div");
+      mainCard.closest(".cardLi");
       mainCard.addEventListener("click", DATA.getMovieID);
     } else {
       let message = document.createElement("p");
