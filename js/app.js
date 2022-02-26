@@ -72,7 +72,8 @@ const APP = {
         break;
 
       case "fourohfour":
-        location.href = "/404.html";
+        console.log("On 404 Page");
+
         break;
     }
   },
@@ -225,6 +226,7 @@ const IDB = {
       APP.recentSearch.forEach((search) => {
         let searchItem = document.createElement("li");
         let searchLink = document.createElement("a");
+        searchLink.classList.add("searchLink");
 
         // Make first letter capital for better visuals.
         searchLink.textContent =

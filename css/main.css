@@ -99,6 +99,17 @@ h2 {
   justify-content: space-around;
 }
 
+.searchLink {
+  font-size: 1.3rem;
+  padding: 1rem;
+}
+
+.searchLink:hover {
+  color: #01b4e4;
+  font-size: 1.5rem;
+  transition: 0.2s;
+}
+
 /************************* Home Page ************************/
 
 .home {
