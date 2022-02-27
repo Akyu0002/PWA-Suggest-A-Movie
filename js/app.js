@@ -24,7 +24,6 @@ const APP = {
     // When online and offline
     window.addEventListener("online", (ev) => {
       APP.isOnline = ev.type;
-
       // Send message to SW
       SW.sendMessage(APP.isOnline);
     });
@@ -52,19 +51,18 @@ const APP = {
         // Get search term from URL.
         let param = new URL(document.location).searchParams;
         APP.urlKeyword = param.get("keyword");
-        // DATA.getSearchResults(APP.urlKeyword);
+
         IDB.getFromDB("searchStore", APP.urlKeyword);
         break;
 
       case "recommended":
+        // On the suggest page
         console.log("On suggest page.");
-        //on the suggest page
+
         let movieParam = new URL(document.location).searchParams;
         APP.movieID = movieParam.get("movieid");
 
-        // DATA.getSuggestedResults(APP.movieID);
         IDB.getFromDB("recommendStore", APP.movieID);
-        //listener for clicking on the movie card container
 
         // Display recent searches
         IDB.getRecentSearch("searchStore");
@@ -72,8 +70,9 @@ const APP = {
         break;
 
       case "fourohfour":
+        // On the 404 page
         console.log("On 404 Page");
-        window.history.pushState("404", "404", "/404.html");
+        window.history.replaceState("404.html");
         IDB.getRecentSearch("searchStore");
         break;
     }
