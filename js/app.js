@@ -361,7 +361,7 @@ const BUILD = {
 
         // Main card div
         let card = document.createElement("div");
-        card.classList.add("card", "d-flex");
+        card.classList.add("card", "d-flex", "h-100");
         card.setAttribute("style", "width: 18rem");
         card.setAttribute("id", movie.id);
         card.setAttribute("movieName", movie.original_title);
