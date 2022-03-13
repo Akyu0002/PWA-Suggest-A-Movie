@@ -84,15 +84,11 @@ const SW = {
     console.log("Registering Service Worker");
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/{PWA-Suggest-A-Movie}/sw.js", {
-          scope: "/{PWA-Suggest-A-Movie}/",
-        })
-        .catch(function (error) {
-          // Something went wrong during registration. The sw.js file
-          // might be unavailable or contain a syntax error.
-          console.warn(error);
-        });
+      navigator.serviceWorker.register("/sw.js").catch(function (error) {
+        // Something went wrong during registration. The sw.js file
+        // might be unavailable or contain a syntax error.
+        console.warn(error);
+      });
       navigator.serviceWorker.ready.then((registration) => {
         // .ready will never reject... just wait indefinitely
         registration.active;
