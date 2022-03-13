@@ -34,7 +34,9 @@ const cacheList = [
   "./img/favicon-16x16.png",
   "./img/favicon-32x32.png",
   // Web Manifest File
-  "./manifest.json",
+  "/manifest.json",
+  // URLS
+  "/{PWA-Suggest-A-Movie}/",
 ];
 
 self.addEventListener("install", (ev) => {
